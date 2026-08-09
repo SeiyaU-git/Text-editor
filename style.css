@@ -1,0 +1,28 @@
+@import url('https://fonts.googleapis.com/css2?family=Stack+Sans+Text:wght@200..700&display=swap');
+
+#editor {
+  font-family: "Stack Sans Text", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+
+  max-width: 700px;        /* page-like width, not full screen */
+  margin: 40px auto;       /* centers it, gives "floating page" feel */
+  padding: 60px 80px;      /* generous inner margins, like a real doc */
+  min-height: 900px;       /* tall like a page */
+  background: rgb(52, 52, 52);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15); /* subtle "paper" shadow */
+  font-family: 'Georgia', serif;  /* or a clean sans-serif like Inter */
+  font-size: 16px;
+  line-height: 1.6;
+  outline: none;           /* removes ugly focus border on contenteditable */
+
+  color: white;
+
+
+  overflow: hidden;
+  white-space: wrap;
+  overflow-wrap: break-word;
+  overflow-x: hidden;
+  word-break: break-all;
+}
