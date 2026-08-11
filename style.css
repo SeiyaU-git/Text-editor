@@ -1,16 +1,20 @@
-@import url('https://fonts.googleapis.com/css2?family=Stack+Sans+Text:wght@200..700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap');
+
+*{
+  font-family: "Space Grotesk", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-style: normal;
+}
 
 #editor {
-  font-family: "Stack Sans Text", sans-serif;
-  font-optical-sizing: auto;
-  font-weight: 400;
-  font-style: normal;
+ 
 
   max-width: 700px;        /* page-like width, not full screen */
   margin: 40px auto;       /* centers it, gives "floating page" feel */
   padding: 60px 80px;      /* generous inner margins, like a real doc */
   min-height: 900px;       /* tall like a page */
-  background: rgb(52, 52, 52);
+  background: rgb(115, 115, 115);
   box-shadow: 0 1px 4px rgba(0,0,0,0.15); /* subtle "paper" shadow */
   font-family: 'Georgia', serif;  /* or a clean sans-serif like Inter */
   font-size: 16px;
@@ -25,4 +29,14 @@
   overflow-wrap: break-word;
   overflow-x: hidden;
   word-break: break-all;
+}
+
+
+.sidebar{
+  position: fixed;
+}
+
+.sidebar ul{
+  display: flex;
+  flex-flow: column;
 }

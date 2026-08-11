@@ -9,11 +9,38 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Stack+Sans+Text:wght@200..700&display=swap" rel="stylesheet">
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 </head>
 <body>
-    <div id="editor" contenteditable="true" ></div>
+    <aside class = "sidebar">
+        <head>DOCUMENT TABS</head>
+        <nav>
+            <ul>
+                <button>
+                    <i class='bx bxs-file-doc'></i>
+                    <span>Current tab</span>
+                </button>
+
+                <button>
+                    <i class='bx bxs-file-doc'></i>
+                    <span>Tab 2</span>
+                </button>
+
+                <button>
+                    <i class='bx bxs-file-doc'></i>
+                    <span>Tab 3</span>
+                </button>
+            </ul>
+        </nav>
+    </aside>
+    <main>
+
+       
+        <div id="editor" contenteditable="true" ></div>
 
 
-    <script src="script.js"></script>
+        <script src="script.js"></script>
+
+    </main>
 </body>
 </html>
