@@ -8,7 +8,6 @@
 }
 
 #editor {
- 
 
   max-width: 700px;        /* page-like width, not full screen */
   margin: 40px auto;       /* centers it, gives "floating page" feel */
@@ -17,7 +16,7 @@
   background: rgb(115, 115, 115);
   box-shadow: 0 1px 4px rgba(0,0,0,0.15); /* subtle "paper" shadow */
   font-family: 'Georgia', serif;  /* or a clean sans-serif like Inter */
-  font-size: 16px;
+  font-size: 24px; /*16
   line-height: 1.6;
   outline: none;           /* removes ugly focus border on contenteditable */
 
@@ -31,12 +30,43 @@
   word-break: break-all;
 }
 
+body {
+  display: flex;
+  flex-direction: row;
+
+}
 
 .sidebar{
-  position: fixed;
+  /* position: fixed; */
+  border: 1px solid grey;
+  width: 200px;
+  height: 100vh;
+  display: flex;
+  flex-flow: column;
 }
+
+.content-area {
+  border: 1px solid grey;
+  width: 100%;
+}
+
 
 .sidebar ul{
   display: flex;
   flex-flow: column;
+  gap: 10px;
+
+}
+
+.document_tab_btn{
+  height: 24px;
+  width: 200px;
+}
+
+.document_btns{
+  display: flex;
+  flex-flow: row;
+  
+  gap: 0px;
+  width: 200px;
 }

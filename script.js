@@ -10,7 +10,7 @@ const shortcuts = {
 const tab = document.createElement("button");
 const createTab = document.getElementById("createTab");
 
-const document_tab_list = document.getElementsByClassName("document_tab_list")[0];
+const documentTabList = document.getElementsByClassName("document_tab_list")[0];
 
 // createTab.addEventListener("click", () => {
 //     editor.innerHTML = "";
@@ -20,8 +20,8 @@ const document_tab_list = document.getElementsByClassName("document_tab_list")[0
 
 
 
-var document_buttons = document.getElementsByClassName('document_tab_btn');
-for (var i = 0; i < document_buttons.length; ++i) {
+let document_buttons = document.getElementsByClassName('document_tab_btn');
+for (let i = 0; i < document_buttons.length; ++i) {
     document_buttons[i].addEventListener('click', function() {
         saveDocument();
         document_tab_name = this.dataset.tabName;
@@ -31,23 +31,80 @@ for (var i = 0; i < document_buttons.length; ++i) {
 
 
 const createDocumentButton = document.getElementById("create_document_btn");
+const deleteDocumentButton = document.getElementById("delete_document_btn");
+const saveDocumentButton = document.getElementById("save_document_btn");
+const loadDocumentButton = document.getElementById("load_document_btn");
+const renameDocumentButton = document.getElementById("rename_document_btn")
+
+
+const fileInput = document.getElementById("fileInput");
 
 createDocumentButton.addEventListener("click", () => {
     const newTabName = prompt("Enter a name for the new document:");
 
     if (newTabName) {
+        saveDocument();
         document_info.set(newTabName, "");
         document_tab_name = newTabName;
+
+        localStorage.setItem("document_info", JSON.stringify(Array.from(document_info.entries())));
+
+        loadDocument();
+    }
+});
+
+renameDocumentButton.addEventListener("click", () => {
+    const newName = prompt("Enter a name for the document")
+
+    if (newName){
+        document_info.delete(document_tab_name)
+        document_info.set(newName, editor.innerHTML)
+        document_tab_name = newName
         saveDocument();
         loadDocument();
     }
 });
 
+deleteDocumentButton.addEventListener("click", () => {
+    if (confirm(`Are you sure you want to delete the document "${document_tab_name}"?`)) {
+        document_info.delete(document_tab_name);
+        localStorage.setItem("document_info", JSON.stringify(Array.from(document_info.entries())));
+        //SAVE NOW
+        document_tab_name = document_info.keys().next().value || "default_tab"; // Set to the first available tab or a default name if none exist
+        loadDocument();
+    }
+});
+
+// TODO
+// ADD SAVE TAB
+// ADD RELOAD INFO
+// ADD SAVE LOCAL STORAGE
+// ADD LOAD LOCAL STORAGE
+// RENAME VARIABLES
+
+saveDocumentButton.addEventListener("click", () => {
+    downlaodDocument();
+});
+
+loadDocumentButton.addEventListener("click", () => {
+    fileInput.click();
+});
+
+fileInput.addEventListener("change", (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+        editor.innerHTML = reader.result;
+    }
+    reader.readAsText(file);
+});
 
 const editor = document.getElementById("editor")
 
-var document_info = new Map();
-var document_tab_name = "current_tab";
+let document_info = new Map();
+let document_tab_name = "current_tab";
 
 
 editor.addEventListener('keydown', (e) => {
@@ -63,20 +120,28 @@ window.onbeforeunload = function(){
 }
 
 window.onload = function exampleFunction(){
+    // localStorage.clear()
     loadDocument()
 }
 
+
 function loadDocument() {
-    document_tab_list.innerHTML = "";
+    documentTabList.innerHTML = "";
     
-    for (let i = 0; i < localStorage.length; i++) {
-        document_info.set(localStorage.key(i), localStorage.getItem(localStorage.key(i)));
+    const savedData = localStorage.getItem("document_info");
+
+    if (savedData) {
+        document_info = new Map(JSON.parse(savedData));
+    }
+
+
+    for (const [key, value] of document_info) {
 
         const newTabButton = document.createElement("button");
         newTabButton.classList.add("document_tab_btn");
-        newTabButton.dataset.tabName = localStorage.key(i);
-        newTabButton.innerHTML = `<i class='bx bxs-file-doc'></i> ${localStorage.key(i)}`;
-        document_tab_list.appendChild(newTabButton);
+        newTabButton.dataset.tabName = key;
+        newTabButton.innerHTML = `<i class='bx bxs-file-doc'></i> ${key}`;
+        documentTabList.appendChild(newTabButton);
         
         newTabButton.addEventListener('click', function() {
             saveDocument();
@@ -92,9 +157,25 @@ function loadDocument() {
 }
 
 function saveDocument() {
-    for (let [key, value] of document_info.entries()) {
-        localStorage.setItem(key, value);
+    if(!document_tab_name){
+        return
     }
-    localStorage.setItem(document_tab_name, editor.innerHTML);
+    document_info.set(document_tab_name, editor.innerHTML);
+    localStorage.setItem("document_info", JSON.stringify(Array.from(document_info.entries())));
+    // localStorage.setItem(document_tab_name, editor.innerHTML);
+    
+
     console.log("saved");
 }
+
+function downlaodDocument() {
+    saveDocument()
+    const text = editor.innerHTML
+    const blob = new Blob([text], {type : "text/plain"})
+    const link = document.createElement("a")
+    link.href = URL.createObjectURL(blob)
+    link.download = `${document_tab_name}.txt`
+    link.click()
+    URL.revokeObjectURL(link.href)
+}
+
