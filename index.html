@@ -15,22 +15,33 @@
     <aside class = "sidebar">
         <head>DOCUMENT TABS</head>
         <nav>
-            <ul>
-                <button>
+            <ul class = "document_tab_list">
+                <button class = "document_tab_btn" data-tab-name = "current_tab">
                     <i class='bx bxs-file-doc'></i>
                     <span>Current tab</span>
                 </button>
 
-                <button>
+                <button class = "document_tab_btn" data-tab-name = "tab2">
+
                     <i class='bx bxs-file-doc'></i>
                     <span>Tab 2</span>
                 </button>
 
-                <button>
+                <button class = "document_tab_btn" data-tab-name = "tab3">
                     <i class='bx bxs-file-doc'></i>
                     <span>Tab 3</span>
                 </button>
+
+                <button id="createTab" class="document_tab_btn" data-tab-name="new_tab">
+                    <i class='bx bxs-file-doc'></i>
+                    <span>Create Tab</span>
+                </button>
             </ul>
+
+            <button id="create_document_btn">
+                <i class='bx bxs-file-plus'></i>
+                <span>New Document</span>
+            </button>
         </nav>
     </aside>
     <main>
@@ -39,7 +50,7 @@
         <div id="editor" contenteditable="true" ></div>
 
 
-        <script src="script.js"></script>
+        <script type="module" src="script.js"></script>
 
     </main>
 </body>
