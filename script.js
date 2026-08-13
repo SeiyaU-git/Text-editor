@@ -40,6 +40,7 @@ editor.addEventListener('keydown', (e) => {
 //#region Document functions
 function saveToLocalStorage() {
     localStorage.setItem("document_info", JSON.stringify(Array.from(document_info.entries())));
+    console.log("SAVED TO LOCAL")
 }
 
 function loadFromLocalStorage() {
@@ -103,6 +104,10 @@ window.onload = function exampleFunction(){
 }
 
 
+var intervalId = setInterval(function() {
+  saveToLocalStorage();
+}, 25000);
+
 
 
 const createDocumentButton = document.getElementById("create_document_btn");
@@ -144,8 +149,6 @@ renameDocumentButton.addEventListener("click", () => {
 deleteDocumentButton.addEventListener("click", () => {
     if (confirm(`Are you sure you want to delete the document "${document_tab_name}"?`)) {
         document_info.delete(document_tab_name);
-        localStorage.setItem("document_info", JSON.stringify(Array.from(document_info.entries())));
-        //SAVE NOW
         document_tab_name = document_info.keys().next().value || "Title tab"; // Set to the first available tab or a default name if none exist
         renderDocument();
     }
