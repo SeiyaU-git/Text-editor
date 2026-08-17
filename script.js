@@ -53,6 +53,23 @@ window.addEventListener("click", () => {
     document_context_menu.classList.remove("active")
 })
 
+
+document.querySelectorAll(".doc_context_btn").forEach(button => {
+    button.addEventListener("click", function() {
+        document_context_menu.classList.remove("active");
+
+        switch(this.dataset.func){
+            case "bold": document.execCommand("bold"); break;
+            case "italics": document.execCommand("italic"); break;
+            case "header": document.execCommand("formatBlock", false, "<h1>"); break;
+            case "list": document.execCommand("insertUnorderedList"); break;
+            case "underline": document.execCommand("underline"); break;
+            case "strike": document.execCommand("strikeThrough"); break;
+        }
+    });
+});
+
+
 //#region Document functions
 function saveToLocalStorage() {
     localStorage.setItem("document_info", JSON.stringify(Array.from(document_info.entries())));
@@ -172,7 +189,7 @@ renameDocumentButton.addEventListener("click", () => {
 deleteDocumentButton.addEventListener("click", () => {
     if (confirm(`Are you sure you want to delete the document "${current_tab}"?`)) {
         document_info.delete(current_tab);
-        current_tab = document_info.keys().next().value || "Title tab"; // Set to the first available tab or a default name if none exist
+        current_tab = document_info.keys().next().value || "current tab"; // Set to the first available tab or a default name if none exist
         renderDocument();
     }
 });

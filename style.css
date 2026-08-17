@@ -3,7 +3,6 @@
 *{
   font-family: "Space Grotesk", sans-serif;
   font-optical-sizing: auto;
-  font-weight: 600;
   font-style: normal;
 
   padding: 0;
@@ -105,18 +104,23 @@ nav a{
 }
 
 
-.document_context_menu ul li a{
+.document_context_menu ul li button{
   text-decoration: none;
   color: black;
   display: inline-block;
+  border: none;
   border-bottom: 1px solid black;
   font-weight: bold;
   width: 100%;
   padding: 0.5rem 1rem;
+  
+  outline: none;
 }
 
-.document_context_menu ul li a:hover{
-  background-color: grey;
+.document_context_menu ul li button:hover{
+  background-color: black;
+  color: white;
+
   border-left: 4px solid red;
 }
 
