@@ -49,6 +49,21 @@ editor.addEventListener("contextmenu", (e) =>{
     }
 })
 
+document.addEventListener("contextmenu", (e) => {
+  const menu = document.querySelector(".document_context_menu");
+
+  if (!editor.contains(e.target)) {
+    menu.classList.remove("active");
+    return; // lets the normal browser context menu happen
+  }
+
+  e.preventDefault();
+
+  menu.style.left = `${e.clientX}px`;
+  menu.style.top = `${e.clientY}px`;
+  menu.classList.add("active");
+});
+
 window.addEventListener("click", () => {
     document_context_menu.classList.remove("active")
 })
