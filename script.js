@@ -4,7 +4,7 @@
 const editor = document.getElementById("editor")
 
 let document_info = new Map();
-let document_tab_name = "current_tab";
+let current_tab = "current_tab";
 
 
 const tab = document.createElement("button");
@@ -37,6 +37,22 @@ editor.addEventListener('keydown', (e) => {
     }
 })
 
+const document_context_menu = document.getElementsByClassName("document_context_menu")[0];
+
+editor.addEventListener("contextmenu", (e) =>{
+    if (document_context_menu) {
+        e.preventDefault();
+        document_context_menu.classList.add("active");
+        
+        document_context_menu.style.left = e.clientX + "px";
+        document_context_menu.style.top = e.clientY + "px";
+    }
+})
+
+window.addEventListener("click", () => {
+    document_context_menu.classList.remove("active")
+})
+
 //#region Document functions
 function saveToLocalStorage() {
     localStorage.setItem("document_info", JSON.stringify(Array.from(document_info.entries())));
@@ -52,13 +68,20 @@ function loadFromLocalStorage() {
 }
 
 function saveTab() {
-    if(!document_tab_name){
+    if(!current_tab){
         return
     }
-    document_info.set(document_tab_name, editor.innerHTML);
+    document_info.set(current_tab, editor.innerHTML);
 }
 
 function renderDocument(){
+    if (!current_tab && document_info.size > 0) {
+        current_tab = document_info.keys().next().value;
+    }
+
+    if (!document_info.has(current_tab)) {
+        current_tab = "current_tab";
+    }
 
     documentTabList.innerHTML = ""
     for (const [key, value] of document_info) {
@@ -69,24 +92,26 @@ function renderDocument(){
         newTabButton.innerHTML = `<i class='bx bxs-file-doc'></i> ${key}`;
         documentTabList.appendChild(newTabButton);
         
+        if (key === current_tab) newTabButton.classList.add("active");
+
         newTabButton.addEventListener('click', function() {
             saveTab();
-            document_tab_name = this.dataset.tabName;
+            current_tab = this.dataset.tabName;
             renderDocument();
         });
     }
 
-    var text_content = document_info.get(document_tab_name)
-    editor.innerHTML = text_content 
+    const text_content = document_info.get(current_tab) || "";
+    editor.innerHTML = text_content;
 }
 
 function downlaodDocument() {
-    saveDocument()
+    saveTab()
     const text = editor.innerHTML
     const blob = new Blob([text], {type : "text/plain"})
     const link = document.createElement("a")
     link.href = URL.createObjectURL(blob)
-    link.download = `${document_tab_name}.txt`
+    link.download = `${current_tab}.txt`
     link.click()
     URL.revokeObjectURL(link.href)
 }
@@ -117,20 +142,18 @@ const loadDocumentButton = document.getElementById("load_document_btn");
 const renameDocumentButton = document.getElementById("rename_document_btn")
 
 
-const fileInput = document.getElementById("fileInput");
-
 
 createDocumentButton.addEventListener("click", () => {
     const newTabName = prompt("Enter a name for the new document:");
 
     if (newTabName) {
-        saveDocument();
+        saveTab();
         document_info.set(newTabName, "");
-        document_tab_name = newTabName;
+        current_tab = newTabName;
 
         localStorage.setItem("document_info", JSON.stringify(Array.from(document_info.entries())));
 
-        loadDocument();
+        renderDocument();
     }
 });
 
@@ -138,18 +161,18 @@ renameDocumentButton.addEventListener("click", () => {
     const newName = prompt("Enter a name for the document")
 
     if (newName){
-        document_info.delete(document_tab_name)
+        document_info.delete(current_tab)
         document_info.set(newName, editor.innerHTML)
-        document_tab_name = newName
+        current_tab = newName
         
         renderDocument();
     }
 });
 
 deleteDocumentButton.addEventListener("click", () => {
-    if (confirm(`Are you sure you want to delete the document "${document_tab_name}"?`)) {
-        document_info.delete(document_tab_name);
-        document_tab_name = document_info.keys().next().value || "Title tab"; // Set to the first available tab or a default name if none exist
+    if (confirm(`Are you sure you want to delete the document "${current_tab}"?`)) {
+        document_info.delete(current_tab);
+        current_tab = document_info.keys().next().value || "Title tab"; // Set to the first available tab or a default name if none exist
         renderDocument();
     }
 });
@@ -165,6 +188,8 @@ saveDocumentButton.addEventListener("click", () => {
     downlaodDocument();
 });
 
+const fileInput = document.getElementById("fileInput");
+
 loadDocumentButton.addEventListener("click", () => {
     fileInput.click();
 });
@@ -175,7 +200,10 @@ fileInput.addEventListener("change", (event) => {
 
     const reader = new FileReader();
     reader.onload = () => {
-        editor.innerHTML = reader.result;
+        const file_name = file.name.replace(/\.[^/.]+$/, "");
+        document_info.set(file_name, reader.result);
+        current_tab = file_name;
+        renderDocument();
     }
     reader.readAsText(file);
 });
