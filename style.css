@@ -17,6 +17,8 @@
   --c-secondary-element-hover: #eff694;
 
   --document-color: #e7e7e7;
+
+  --highlight: #eaea64;
 }
 
 *{
@@ -187,3 +189,7 @@ nav a{
   font-family: "Azeret Mono", monospace;
 }
 
+
+.highlight{
+  background-color: var(--highlight);
+}

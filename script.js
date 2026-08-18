@@ -29,7 +29,8 @@ const shortcuts = {
   'u': () => document.execCommand('underline'),
   'h': () => document.execCommand('formatBlock', false, '<h1>'),
   '8': () => document.execCommand('insertUnorderedList'),
-  's': () => saveToLocalStorage()
+  's': () => saveToLocalStorage(),
+  'f': () => highlight(),
 }
 
 editor.addEventListener('keydown', (e) => {
@@ -38,6 +39,25 @@ editor.addEventListener('keydown', (e) => {
         shortcuts[e.key]();
     }
 })
+
+
+function highlight(){
+    const selection = window.getSelection();
+    if (!selection.rangeCount) return;
+    if (selection.isCollapsed) return; // No text selected
+
+    const range = selection.getRangeAt(0);
+    const span = document.createElement('span');
+    
+    span.classList.add('highlight');
+    range.surroundContents(span);
+
+    selection.removeAllRanges();
+    selection.addRange(range);
+    
+}
+
+
 
 const document_context_menu = document.getElementsByClassName("document_context_menu")[0];
 const tab_context_menu = document.getElementsByClassName("tab_context_menu")[0]
@@ -90,6 +110,7 @@ document.querySelectorAll(".doc_context_btn").forEach(button => {
             case "list": document.execCommand("insertUnorderedList"); break;
             case "underline": document.execCommand("underline"); break;
             case "strike": document.execCommand("strikeThrough"); break;
+            case "highlight": highlight(); break;
         }
     });
 });
