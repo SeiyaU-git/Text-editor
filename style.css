@@ -1,6 +1,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300..700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Azeret+Mono:ital,wght@0,100..900;1,100..900&display=swap');
 
+:root{
+  --c-background: #ffffff;
+
+  --c-text: #000000;
+  --c-text-hover: #0000ff;
+
+  --c-element: #eeedee;
+  --c-element-hover: #fbff00;
+
+  --c-secondary-text: #2e2d2e;  
+  --c-secondary-text-hover: #d7d7d7;
+
+  --c-secondary-element: #fcfcfc;
+  --c-secondary-element-hover: #eff694;
+
+  --document-color: #e7e7e7;
+}
 
 *{
   font-family: "Space Grotesk", sans-serif;
@@ -17,16 +34,16 @@
 
   max-width: 700px;        /* page-like width, not full screen */
   margin: 40px auto;       /* centers it, gives "floating page" feel */
-  padding: 60px 80px;      /* generous inner margins, like a real doc */
+  padding: 40px 80px;      /* generous inner margins, like a real doc */
   min-height: 900px;       /* tall like a page */
-  background: rgb(115, 115, 115);
+  background: var(--document-color);
   box-shadow: 0 1px 4px rgba(0,0,0,0.15); /* subtle "paper" shadow */
   font-family: 'Georgia', serif;  /* or a clean sans-serif like Inter */
   font-size: 24px; /* was 16 */
   line-height: 1.6;
   outline: none;           /* removes ugly focus border on contenteditable */
 
-  color: white;
+  color: var(--c-text);
 
 
   overflow: hidden;
@@ -39,14 +56,14 @@
 body {
   display: flex;
   flex-direction: row;
+  background: var(--c-background);
 
 }
 
 .sidebar{
   position: fixed;
-  border: 1px solid grey;
-  background-color: grey;
-  color: white;
+  background-color: var(--c-element);
+  color: var(--c-text);
   width: 200px;
   height: 100vh;
   display: flex;
@@ -66,14 +83,34 @@ body {
 
 }
 
+button{
+  background-color: var(--c-secondary-element);
+  color: var(--c-text);
+  border: none;
+  border-radius: 8px;
+}
+
+
+button:hover{
+  background-color: var(--c-secondary-element-hover);
+  color: var(--c-text-hover);
+}
+
 .document_tab_btn{
   height: 48px;
   width: 200px;
+
+  
 }
 
 .document_tab_btn.active{
-  background-color: black;
-  color: white;
+  background-color: var(--c-element-hover);
+  color: var(--c-text-hover);
+}
+
+.document_tab_btn.selected{
+  background-color: var(--c-secondary-element-hover);
+  color: var(--c-text-hover);
 }
 
 .document_btns{
@@ -89,15 +126,15 @@ nav a{
 
 }
 
-.document_context_menu.active{
-  color: black;
-  background-color: white;
+.context_menu.active{
+  color: var(--c-text);
+  background-color: var(--c-secondary-element);
 }
 
-.document_context_menu{
+.context_menu{
   width: 11rem;
   box-shadow: 0 4px 8px -2px rgba(0, 0, 0, 0.3);
-  background-color: white;
+  background-color: var(--c-secondary-element);
 
   opacity: 0;
   pointer-events: none;
@@ -108,15 +145,15 @@ nav a{
   
 }
 
-.document_context_menu.active{
+.context_menu.active{
   opacity: 1;
   pointer-events: auto;
 }
 
 
-.document_context_menu ul li button{
+.context_menu ul li button{
   text-decoration: none;
-  color: black;
+  color: var(--c-text);
   display: flex;
   
   border: none;
@@ -131,21 +168,22 @@ nav a{
   font-family: "Azeret Mono", monospace;
 }
 
-.document_context_menu ul li button:hover{
-  background-color: black;
-  color: white;
+.context_menu ul li button:hover{
+  background-color: var(--c-secondary-element-hover);
+  color: var(--c-text-hover);
 
   border-left: 4px solid red;
 }
 
-.document_context_menu ul{
+.context_menu ul{
   list-style: none;
 }
 
 
-.document_context_menu ul li button i{
-  color: grey;
+.context_menu ul li button span{
+  color: var(--c-secondary-text);
   text-align: right;
   margin-left: auto;
   font-family: "Azeret Mono", monospace;
 }
+

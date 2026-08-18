@@ -68,14 +68,22 @@
 
     </main>
 
-    <div class = "document_context_menu">
+    <div class = "context_menu document_context_menu">
         <ul>
-            <li><button class = "doc_context_btn" data-func = "bold"> Bold <i>ctrl B</i></button></li>
-            <li><button class = "doc_context_btn" data-func = "italics"> Italics <i>ctrl I</i></button></li>
-            <li><button class = "doc_context_btn" data-func = "header"> Header <i>ctrl H</i></button></li>
-            <li><button class = "doc_context_btn" data-func = "list"> List <i>ctrl 8</i></button></li>  
-            <li><button class = "doc_context_btn" data-func = "underline"> Underline <i>ctrl U</i></button></li>  
-            <li><button class = "doc_context_btn" data-func = "strike"> Strike <i></i></button></li>  
+            <li><button class = "doc_context_btn" data-func = "bold"><i class='bx bx-underline'></i> Bold <span>ctrl B</span></button></li>
+            <li><button class = "doc_context_btn" data-func = "italics"><i class='bx bx-italic'></i> Italics <span>ctrl I</span></button></li>
+            <li><button class = "doc_context_btn" data-func = "header"><i class='bx bx-header'></i> Header <span>ctrl H</span></button></li>
+            <li><button class = "doc_context_btn" data-func = "list"><i class='bx bx-list-ul'></i> List <span>ctrl 8</span></button></li>  
+            <li><button class = "doc_context_btn" data-func = "un-line"><i class='bx bx-underline'></i> Underline <span>ctrl U</span></button></li>  
+            <li><button class = "doc_context_btn" data-func = "strike"><i class='bx bx-strikethrough'></i> Strike <span></span></button></li>  
+        </ul>
+    </div>
+
+        <div class = "context_menu tab_context_menu">
+        <ul>
+            <li><button class = "tab_context_btn" data-func = "delete"> Delete</button></li>
+            <li><button class = "tab_context_btn" data-func = "rename"> Rename</button></li>
+            <li><button class = "tab_context_btn" data-func = "save"> Save</button></li>
         </ul>
     </div>
 </body>

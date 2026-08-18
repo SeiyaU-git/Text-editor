@@ -12,6 +12,8 @@ const createTab = document.getElementById("createTab");
 
 const documentTabList = document.getElementsByClassName("document_tab_list")[0];
 
+const sidebar = document.getElementsByClassName("sidebar")[0];
+
 // createTab.addEventListener("click", () => {
 //     editor.innerHTML = "";
 //     // create a new tab
@@ -38,34 +40,42 @@ editor.addEventListener('keydown', (e) => {
 })
 
 const document_context_menu = document.getElementsByClassName("document_context_menu")[0];
+const tab_context_menu = document.getElementsByClassName("tab_context_menu")[0]
 
-editor.addEventListener("contextmenu", (e) =>{
-    if (document_context_menu) {
-        e.preventDefault();
-        document_context_menu.classList.add("active");
-        
-        document_context_menu.style.left = e.clientX + "px";
-        document_context_menu.style.top = e.clientY + "px";
-    }
-})
+var selected_tab = ""
 
 document.addEventListener("contextmenu", (e) => {
-  const menu = document.querySelector(".document_context_menu");
+  tab_context_menu.classList.remove("active");
+  document_context_menu.classList.remove("active");
+  const tabButtons = document.getElementsByClassName("document_tab_btn");
+  Array.from(tabButtons).forEach((tabButton) => {
+    tabButton.classList.remove("selected");
+  });
 
-  if (!editor.contains(e.target)) {
-    menu.classList.remove("active");
-    return; // lets the normal browser context menu happen
+  if (editor.contains(e.target)){
+    e.preventDefault();
+    document_context_menu.style.left = `${e.clientX}px`;
+    document_context_menu.style.top = `${e.clientY}px`;
+    document_context_menu.classList.add("active"); 
+    
+  }else if (e.target.classList.contains("document_tab_btn")){
+    e.preventDefault();
+    tab_context_menu.style.left = "200px";
+    tab_context_menu.style.top = `${e.clientY}px`;
+    tab_context_menu.classList.add("active"); 
+
+    selected_tab = e.target.dataset.tabName;
+    e.target.classList.add("selected")
   }
-
-  e.preventDefault();
-
-  menu.style.left = `${e.clientX}px`;
-  menu.style.top = `${e.clientY}px`;
-  menu.classList.add("active");
 });
 
 window.addEventListener("click", () => {
     document_context_menu.classList.remove("active")
+    tab_context_menu.classList.remove("active")
+    const tabButtons = document.getElementsByClassName("document_tab_btn");
+    Array.from(tabButtons).forEach((tabButton) => {
+        tabButton.classList.remove("selected");
+    });
 })
 
 
@@ -81,6 +91,23 @@ document.querySelectorAll(".doc_context_btn").forEach(button => {
             case "underline": document.execCommand("underline"); break;
             case "strike": document.execCommand("strikeThrough"); break;
         }
+    });
+});
+
+document.querySelectorAll(".tab_context_btn").forEach(button => {
+    button.addEventListener("click", function() {
+        tab_context_menu.classList.remove("active");
+
+        switch(this.dataset.func){
+            case "delete": delete_tab(selected_tab); break;
+            case "rename": rename_tab(selected_tab); break;
+            case "save": downlaodDocument(selected_tab); break;
+        }
+
+        const tabButtons = document.getElementsByClassName("document_tab_btn");
+        Array.from(tabButtons).forEach((tabButton) => {
+            tabButton.classList.remove("selected");
+        });
     });
 });
 
@@ -137,9 +164,9 @@ function renderDocument(){
     editor.innerHTML = text_content;
 }
 
-function downlaodDocument() {
+function downlaodDocument(tab) {
     saveTab()
-    const text = editor.innerHTML
+    const text = document_info.get(tab)
     const blob = new Blob([text], {type : "text/plain"})
     const link = document.createElement("a")
     link.href = URL.createObjectURL(blob)
@@ -190,24 +217,37 @@ createDocumentButton.addEventListener("click", () => {
 });
 
 renameDocumentButton.addEventListener("click", () => {
-    const newName = prompt("Enter a name for the document")
-
-    if (newName){
-        document_info.delete(current_tab)
-        document_info.set(newName, editor.innerHTML)
-        current_tab = newName
-        
-        renderDocument();
-    }
+    rename_tab(current_tab)
 });
 
 deleteDocumentButton.addEventListener("click", () => {
-    if (confirm(`Are you sure you want to delete the document "${current_tab}"?`)) {
-        document_info.delete(current_tab);
-        current_tab = document_info.keys().next().value || "current tab"; // Set to the first available tab or a default name if none exist
+    delete_tab(current_tab)
+});
+
+
+//#region document tab functions
+function rename_tab(tab){
+    const newName = prompt("Enter a name for the document")
+
+    if (newName){
+        document_info.delete(tab)
+        document_info.set(newName, editor.innerHTML)
+        
+        if (tab == current_tab) current_tab = newName
+        
         renderDocument();
     }
-});
+}
+
+function delete_tab(tab){
+    if (confirm(`Are you sure you want to delete the document "${tab}"?`)) {
+        document_info.delete(tab);
+        tab = document_info.keys().next().value || "current tab"; // Set to the first available tab or a default name if none exist
+        renderDocument();
+    }
+}
+
+//#endregion
 
 // TODO
 // ADD SAVE TAB
@@ -217,7 +257,7 @@ deleteDocumentButton.addEventListener("click", () => {
 // RENAME VARIABLES
 
 saveDocumentButton.addEventListener("click", () => {
-    downlaodDocument();
+    downlaodDocument(current_tab);
 });
 
 const fileInput = document.getElementById("fileInput");
