@@ -7,12 +7,17 @@ let document_info = new Map();
 let current_tab = "current_tab";
 
 
-const tab = document.createElement("button");
+const tabElement = document.createElement("button");
 const createTab = document.getElementById("createTab");
 
 const documentTabList = document.getElementsByClassName("document_tab_list")[0];
 
 const sidebar = document.getElementsByClassName("sidebar")[0];
+const sidebarCollapseBtn = document.querySelector(".sidebar_collapse")
+
+sidebarCollapseBtn.addEventListener("click", () => {
+    sidebar.classList.toggle("collapsed")
+})
 
 // createTab.addEventListener("click", () => {
 //     editor.innerHTML = "";
@@ -59,14 +64,14 @@ function highlight(){
 
 
 
-const document_context_menu = document.getElementsByClassName("document_context_menu")[0];
-const tab_context_menu = document.getElementsByClassName("tab_context_menu")[0]
+const documentContextMenu = document.getElementsByClassName("document_context_menu")[0];
+const tabContextMenu = document.getElementsByClassName("tab_context_menu")[0]
 
 var selected_tab = ""
 
 document.addEventListener("contextmenu", (e) => {
-  tab_context_menu.classList.remove("active");
-  document_context_menu.classList.remove("active");
+    tabContextMenu.classList.remove("active");
+    documentContextMenu.classList.remove("active");
   const tabButtons = document.getElementsByClassName("document_tab_btn");
   Array.from(tabButtons).forEach((tabButton) => {
     tabButton.classList.remove("selected");
@@ -74,15 +79,15 @@ document.addEventListener("contextmenu", (e) => {
 
   if (editor.contains(e.target)){
     e.preventDefault();
-    document_context_menu.style.left = `${e.clientX}px`;
-    document_context_menu.style.top = `${e.clientY}px`;
-    document_context_menu.classList.add("active"); 
+    documentContextMenu.style.left = `${e.clientX}px`;
+    documentContextMenu.style.top = `${e.clientY}px`;
+    documentContextMenu.classList.add("active"); 
     
   }else if (e.target.classList.contains("document_tab_btn")){
     e.preventDefault();
-    tab_context_menu.style.left = "200px";
-    tab_context_menu.style.top = `${e.clientY}px`;
-    tab_context_menu.classList.add("active"); 
+    tabContextMenu.style.left = "200px";
+    tabContextMenu.style.top = `${e.clientY}px`;
+    tabContextMenu.classList.add("active"); 
 
     selected_tab = e.target.dataset.tabName;
     e.target.classList.add("selected")
@@ -90,8 +95,8 @@ document.addEventListener("contextmenu", (e) => {
 });
 
 window.addEventListener("click", () => {
-    document_context_menu.classList.remove("active")
-    tab_context_menu.classList.remove("active")
+    documentContextMenu.classList.remove("active")
+    tabContextMenu.classList.remove("active")
     const tabButtons = document.getElementsByClassName("document_tab_btn");
     Array.from(tabButtons).forEach((tabButton) => {
         tabButton.classList.remove("selected");
@@ -101,7 +106,7 @@ window.addEventListener("click", () => {
 
 document.querySelectorAll(".doc_context_btn").forEach(button => {
     button.addEventListener("click", function() {
-        document_context_menu.classList.remove("active");
+        documentContextMenu.classList.remove("active");
 
         switch(this.dataset.func){
             case "bold": document.execCommand("bold"); break;
@@ -117,11 +122,11 @@ document.querySelectorAll(".doc_context_btn").forEach(button => {
 
 document.querySelectorAll(".tab_context_btn").forEach(button => {
     button.addEventListener("click", function() {
-        tab_context_menu.classList.remove("active");
+        tabContextMenu.classList.remove("active");
 
         switch(this.dataset.func){
-            case "delete": delete_tab(selected_tab); break;
-            case "rename": rename_tab(selected_tab); break;
+            case "delete": deleteTab(selected_tab); break;
+            case "rename": renameTab(selected_tab); break;
             case "save": downlaodDocument(selected_tab); break;
         }
 
@@ -169,7 +174,7 @@ function renderDocument(){
         const newTabButton = document.createElement("button");
         newTabButton.classList.add("document_tab_btn");
         newTabButton.dataset.tabName = key;
-        newTabButton.innerHTML = `<i class='bx bxs-file-doc'></i> ${key}`;
+        newTabButton.innerHTML = `<i class='bx bxs-file-doc'></i> <span>${key}<span>`;
         documentTabList.appendChild(newTabButton);
         
         if (key === current_tab) newTabButton.classList.add("active");
@@ -238,16 +243,16 @@ createDocumentButton.addEventListener("click", () => {
 });
 
 renameDocumentButton.addEventListener("click", () => {
-    rename_tab(current_tab)
+    renameTab(current_tab)
 });
 
 deleteDocumentButton.addEventListener("click", () => {
-    delete_tab(current_tab)
+    deleteTab(current_tab)
 });
 
 
 //#region document tab functions
-function rename_tab(tab){
+function renameTab(tab){
     const newName = prompt("Enter a name for the document")
 
     if (newName){
@@ -260,7 +265,7 @@ function rename_tab(tab){
     }
 }
 
-function delete_tab(tab){
+function deleteTab(tab){
     if (confirm(`Are you sure you want to delete the document "${tab}"?`)) {
         document_info.delete(tab);
         tab = document_info.keys().next().value || "current tab"; // Set to the first available tab or a default name if none exist
