@@ -4,7 +4,7 @@
 const editor = document.getElementById("editor")
 
 let document_info = new Map();
-let current_tab = "current_tab";
+let current_tab = "Title tab";
 
 
 const tabElement = document.createElement("button");
@@ -25,8 +25,25 @@ sidebarCollapseBtn.addEventListener("click", () => {
 //     const newTab = editor.cloneNode(true);
 // }
 
+let document_history = []
+let history_index = -1  
 
+function undo(){
+    history_index -= 1
+    if (history_index < 0) return
+    editor.innerHTML = document_history[history_index]
 
+    console.log('undo')
+}
+
+function redo(){
+
+}
+
+function document_snapshot(){
+    history_index += 1
+    document_history[history_index] = editor.innerHTML;
+}
 
 const shortcuts = {
   'b': () => document.execCommand('bold'),
@@ -36,6 +53,8 @@ const shortcuts = {
   '8': () => document.execCommand('insertUnorderedList'),
   's': () => saveToLocalStorage(),
   'f': () => highlight(),
+
+  'z': () => undo(),
 }
 
 editor.addEventListener('keydown', (e) => {
@@ -43,7 +62,10 @@ editor.addEventListener('keydown', (e) => {
         e.preventDefault();
         shortcuts[e.key]();
     }
+
+    if (e.key == "Enter" || e.key == "  " || e.key == "Return") document_snapshot();
 })
+
 
 
 function highlight(){
@@ -210,6 +232,7 @@ window.onbeforeunload = function(){
 window.onload = function exampleFunction(){
     // localStorage.clear()
     loadFromLocalStorage()
+    current_tab = document_info.keys().next().value || "current tab"
     renderDocument()
 }
 
@@ -268,11 +291,13 @@ function renameTab(tab){
 function deleteTab(tab){
     if (confirm(`Are you sure you want to delete the document "${tab}"?`)) {
         document_info.delete(tab);
-        tab = document_info.keys().next().value || "current tab"; // Set to the first available tab or a default name if none exist
-        renderDocument();
+        if (tab === current_tab) {
+            current_tab = [...document_info.keys()].at(-1) || "current tab";
+        }
+
+        renderDocument()
     }
 }
-
 //#endregion
 
 // TODO
@@ -307,9 +332,52 @@ fileInput.addEventListener("change", (event) => {
 });
 
 
+const ctrl_kbd = document.getElementById("ctrl_kbd");
 
+const kbd_elements = document.getElementsByClassName("kbd");
 
+const normalizeKey = (key) => {
+    const normalizedKey = key.trim().toLowerCase();
+    const aliases = {
+        control: "ctrl",
+        spacebar: "space",
+        " ": "space",
+        esc: "escape",
+        del: "delete",
+        arrowup: "up",
+        arrowdown: "down",
+        arrowleft: "left",
+        arrowright: "right"
+    };
+    return aliases[normalizedKey] || normalizedKey;
+};
 
+const updateKeyboardIndicator = (key, active) => {
+    const normalizedKey = normalizeKey(key);
 
+    if (normalizedKey === "ctrl") {
+        ctrl_kbd?.classList.toggle("active", active);
+    }
 
+    for (const kbd_element of kbd_elements) {
+        const displayedKey = normalizeKey(kbd_element.textContent);
+        if (displayedKey === normalizedKey || displayedKey.split(/\s*\+\s*/).includes(normalizedKey)) {
+            kbd_element.classList.toggle("active", active);
+        }
+    }
+};
 
+window.addEventListener("keyup", (e) => {
+    updateKeyboardIndicator(e.key, false);
+});
+
+window.addEventListener("keydown", (e) => {
+    updateKeyboardIndicator(e.key, true);
+});
+
+window.addEventListener("blur", () => {
+    for (const kbd_element of kbd_elements) {
+        kbd_element.classList.remove("active");
+    }
+    ctrl_kbd?.classList.remove("active");
+});

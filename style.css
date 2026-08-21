@@ -10,7 +10,7 @@
   --c-element: #ffffff;
   --c-element-hover: #fbff00;
 
-  --c-secondary-text: #2e2d2e;  
+  --c-secondary-text: #a4a4a4;  
   --c-secondary-text-hover: #d7d7d7;
 
   --c-secondary-element: #fcfcfc;
@@ -60,6 +60,36 @@ body {
   flex-direction: row;
   background: var(--c-background);
 
+}
+
+small{
+  color: var(--c-secondary-text)
+}
+
+hr{
+  margin: 1rem 1rem;
+}
+
+kbd {
+  padding: 2px 6px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #f5f5f5;
+  box-shadow: 0 1px 0 #aaa;
+  font-family: monospace;
+  font-size: 0.85em;
+
+  display: inline-block;
+  height: 40px;
+  aspect-ratio: 1/1;
+}
+
+kbd.active{
+  /* color: var(--c-text-hover); */
+  border: 1px solid #0000ff;
+  box-shadow: none;
+  background-color: var(--c-text-hover);
+  color: var(--c-element)
 }
 
 .sidebar{
@@ -210,9 +240,13 @@ nav a{
   text-align: right;
   margin-left: auto;
   font-family: "Azeret Mono", monospace;
+
 }
 
 
 .highlight{
   background-color: var(--highlight);
 }
+
+
+
