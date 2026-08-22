@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content=" width=device-width, initial-scale=1.0">
     <title>Document</title>
     <link rel="stylesheet" href="style.css">
     
@@ -13,49 +13,55 @@
 </head>
 <body>
     <aside class = "sidebar">
-        <h2>DOCUMENT TABS</h2   >
+        
+        <button class = "sidebar_collapse"><i class='bx bx-sidebar'></i></button>
         <nav>
-            <button class = "sidebar_collapse"><i class='bx bx-sidebar'></i></button>
+            <h2>DOCUMENTS</h2>
+            <ul class = "document_list">
+                
+            </ul>
+
+
+            <h2>DOCUMENT TABS</h2>
             <ul class = "document_tab_list">
                 
             </ul>
-            <!-- WOWOWOW -->
-
-            <div class="document_btns">
-
-                <button id="create_document_btn">
-                    <i class='bx bxs-file-plus'></i>
-                    <span>New</span>
-                </button>
-
-                <button id="delete_document_btn">
-                    <i class='bx bxs-trash'></i>
-                    <span>Delete</span>
-                </button>
-
-                <button id="save_document_btn">
-                    <i class='bx bxs-save' ></i>
-                    <span>Save</span>
-                </button>
-
-                <button id="load_document_btn">
-                    <i class='bx bxs-file-import'></i>
-                    <span>Load</span>
-                </button>
-
-                <button id="rename_document_btn">
-                    <i class='bx bxs-rename' ></i>
-                    <span>Rename</span>
-                </button>
             
-            </div>
-
         </nav>
+
+        <div class="document_btns">
+            <button id="create_document_btn">
+                <i class='bx bxs-file-plus'></i>
+                <span>New</span>
+            </button>
+
+            <button id="delete_document_btn">
+                <i class='bx bxs-trash'></i>
+                <span>Delete</span>
+            </button>
+
+            <button id="save_document_btn">
+                <i class='bx bxs-save' ></i>
+                <span>Save</span>
+            </button>
+
+            <button id="load_document_btn">
+                <i class='bx bxs-file-import'></i>
+                <span>Load</span>
+            </button>
+
+            <button id="rename_document_btn">
+                <i class='bx bxs-rename' ></i>
+                <span>Rename</span>
+            </button>
+        
+        </div>
+
     </aside>
 
     
 
-    <main class="content-area">
+    <main>
      
         <div id="editor" contenteditable="true" ></div>
 
@@ -94,7 +100,7 @@
 
     <div class = "context_menu document_context_menu">
         <ul>
-            <li><button class = "doc_context_btn" data-func = "bold"><i class='bx bx-underline'></i>  Bold <span>ctrl B</span></button></li>
+            <li><button class = "doc_context_btn" data-func = "bold"><i class='bx bx-bold'></i>  Bold <span>ctrl B</span></button></li>
             <li><button class = "doc_context_btn" data-func = "italics"><i class='bx bx-italic'></i>  Italics <span>ctrl I</span></button></li>
             <li><button class = "doc_context_btn" data-func = "header"><i class='bx bx-header'></i>  Header <span>ctrl H</span></button></li>
             <li><button class = "doc_context_btn" data-func = "list"><i class='bx bx-list-ul'></i>  List <span>ctrl 8</span></button></li>  

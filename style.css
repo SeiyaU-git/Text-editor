@@ -98,14 +98,20 @@ kbd.active{
   color: var(--c-text);
   width: 200px;
   height: 100vh;
-  display: flex;
-  flex-flow: column;
 
   box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+
+  display: flex;
+  flex-flow: column;
+  gap: 80px;
 }
 
-.content-area {
-  border: 1px solid grey;
+.sidebar.collapsed{
+  width: 40px;
+  overflow: hidden;
+}
+
+main{
   width: 100%;
 }
 
@@ -114,7 +120,6 @@ kbd.active{
   display: flex;
   flex-flow: column;
   gap: 10px;
-
 }
 
 button{
@@ -141,9 +146,6 @@ button:hover{
   overflow: hidden;
 }
 
-.collapsed .document_tab_btn{
-  width: 40px;
-}
 
 .document_tab_btn span{
   display: all;
@@ -153,19 +155,23 @@ button:hover{
   display: none;
 }
 
-.sidebar.collapsed{
-  width: 80px;
-}
 
-.document_tab_btn.active{
-  background-color: var(--c-element-hover);
-  color: var(--c-text-hover);
-}
+
+
 
 .document_tab_btn.selected{
   background-color: var(--c-secondary-element-hover);
   color: var(--c-text-hover);
   border: 4px solid red;
+}
+
+.document_btn{
+  height: 96px;
+  width: 200px;
+
+  text-align: left;
+
+  overflow: hidden;
 }
 
 .document_btns{
@@ -174,6 +180,11 @@ button:hover{
   
   gap: 0px;
   width: 200px;
+}
+
+.current{
+  background-color: var(--c-element-hover);
+  color: var(--c-text-hover);
 }
 
 nav a{

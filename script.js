@@ -10,7 +10,6 @@ let current_tab = "Title tab";
 const tabElement = document.createElement("button");
 const createTab = document.getElementById("createTab");
 
-const documentTabList = document.getElementsByClassName("document_tab_list")[0];
 
 const sidebar = document.getElementsByClassName("sidebar")[0];
 const sidebarCollapseBtn = document.querySelector(".sidebar_collapse")
@@ -40,9 +39,14 @@ function redo(){
 
 }
 
-function document_snapshot(){
+function createSnapshot(){
     history_index += 1
     document_history[history_index] = editor.innerHTML;
+}
+
+function clearSnapshot(){
+    document_history = []
+    history_index = -1  
 }
 
 const shortcuts = {
@@ -63,7 +67,7 @@ editor.addEventListener('keydown', (e) => {
         shortcuts[e.key]();
     }
 
-    if (e.key == "Enter" || e.key == "  " || e.key == "Return") document_snapshot();
+    if (e.key == "Enter" || e.key == "  " || e.key == "Return" || e.key === "Delete" || e.key === "Backspace") createSnapshot();
 })
 
 
@@ -160,6 +164,8 @@ document.querySelectorAll(".tab_context_btn").forEach(button => {
 });
 
 
+let loaded_storage = {}
+
 //#region Document functions
 function saveToLocalStorage() {
     localStorage.setItem("document_info", JSON.stringify(Array.from(document_info.entries())));
@@ -174,12 +180,23 @@ function loadFromLocalStorage() {
     }
 }
 
+
+
 function saveTab() {
     if(!current_tab){
         return
     }
     document_info.set(current_tab, editor.innerHTML);
 }
+
+const documentTabList = document.getElementsByClassName("document_tab_list")[0];
+const documentList = document.getElementsByClassName("document_list")[0];
+
+let current_document = ""
+let loaded_info = new Map([
+    ["blah", new Map()],
+    ["cuh", new Map()]
+])
 
 function renderDocument(){
     if (!current_tab && document_info.size > 0) {
@@ -199,12 +216,37 @@ function renderDocument(){
         newTabButton.innerHTML = `<i class='bx bxs-file-doc'></i> <span>${key}<span>`;
         documentTabList.appendChild(newTabButton);
         
-        if (key === current_tab) newTabButton.classList.add("active");
+        if (key === current_tab) newTabButton.classList.add("current");
 
         newTabButton.addEventListener('click', function() {
             saveTab();
             current_tab = this.dataset.tabName;
             renderDocument();
+
+            clearSnapshot();
+            createSnapshot();
+            console.log(current_tab);
+        });
+    }
+
+    documentList.innerHTML = ""
+    for (const [key, value] of loaded_info) {
+        const newDocBtn = document.createElement("button");
+        newDocBtn.classList.add("document_btn");
+        newDocBtn.dataset.docName = key;
+        newDocBtn.innerHTML = `<i class='bx bxs-file-doc'></i> <span>${key}<span>`;
+        documentList.appendChild(newDocBtn);
+
+        if (key === current_document) newDocBtn.classList.add("current");
+
+        newDocBtn.addEventListener('click', function() {
+            saveTab();
+            current_document = this.dataset.docName
+
+            document_info = loaded_info.get(current_document) || new Map();
+            renderDocument();
+
+            console.log(current_document);
         });
     }
 
@@ -329,6 +371,9 @@ fileInput.addEventListener("change", (event) => {
         renderDocument();
     }
     reader.readAsText(file);
+
+    clearSnapshot();
+    createSnapshot();
 });
 
 
