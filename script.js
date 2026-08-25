@@ -6,24 +6,6 @@ const editor = document.getElementById("editor")
 let document_info = new Map();
 let current_tab = "Title tab";
 
-
-const tabElement = document.createElement("button");
-const createTab = document.getElementById("createTab");
-
-
-const sidebar = document.getElementsByClassName("sidebar")[0];
-const sidebarCollapseBtn = document.querySelector(".sidebar_collapse")
-
-sidebarCollapseBtn.addEventListener("click", () => {
-    sidebar.classList.toggle("collapsed")
-})
-
-// createTab.addEventListener("click", () => {
-//     editor.innerHTML = "";
-//     // create a new tab
-//     const newTab = editor.cloneNode(true);
-// }
-
 let document_history = []
 let history_index = -1  
 
@@ -57,7 +39,6 @@ const shortcuts = {
   '8': () => document.execCommand('insertUnorderedList'),
   's': () => saveToLocalStorage(),
   'f': () => highlight(),
-
   'z': () => undo(),
 }
 
@@ -70,7 +51,22 @@ editor.addEventListener('keydown', (e) => {
     if (e.key == "Enter" || e.key == "  " || e.key == "Return" || e.key === "Delete" || e.key === "Backspace") createSnapshot();
 })
 
+const tabElement = document.createElement("button");
+const createTab = document.getElementById("createTab");
 
+
+const sidebar = document.getElementsByClassName("sidebar")[0];
+const sidebarCollapseBtn = document.querySelector(".sidebar_collapse")
+
+sidebarCollapseBtn.addEventListener("click", () => {
+    sidebar.classList.toggle("collapsed")
+})
+
+// createTab.addEventListener("click", () => {
+//     editor.innerHTML = "";
+//     // create a new tab
+//     const newTab = editor.cloneNode(true);
+// }
 
 function highlight(){
     const selection = window.getSelection();
@@ -166,13 +162,21 @@ document.querySelectorAll(".tab_context_btn").forEach(button => {
 
 let loaded_storage = {}
 
+function save_to_documents(){
+    loaded_info[0].tab_name = current_document
+    loaded_info[0].tabs = [document_info]
+}   
+
 //#region Document functions
 function saveToLocalStorage() {
+    const documents = new Map
+
     localStorage.setItem("document_info", JSON.stringify(Array.from(document_info.entries())));
     console.log("SAVED TO LOCAL")
 }
 
 function loadFromLocalStorage() {
+    
     const savedData = localStorage.getItem("document_info");
 
     if (savedData) {
@@ -285,18 +289,23 @@ var intervalId = setInterval(function() {
 
 
 
-const createDocumentButton = document.getElementById("create_document_btn");
-const deleteDocumentButton = document.getElementById("delete_document_btn");
-const saveDocumentButton = document.getElementById("save_document_btn");
-const loadDocumentButton = document.getElementById("load_document_btn");
-const renameDocumentButton = document.getElementById("rename_document_btn")
+const createTabButton = document.getElementById("create_tab_btn");
+const deleteTabButton = document.getElementById("delete_tab_btn");
+const saveTabButton = document.getElementById("save_tab_btn");
+const loadTabButton = document.getElementById("load_tab_btn");
+const renameTabButton = document.getElementById("rename_tab_btn")
 
 
 
-createDocumentButton.addEventListener("click", () => {
+createTabButton.addEventListener("click", () => {
     const newTabName = prompt("Enter a name for the new document:");
 
     if (newTabName) {
+        if (document_info.has(newTabName)) {
+            alert("A document with that name already exists.");
+            return;
+        }
+
         saveTab();
         document_info.set(newTabName, "");
         current_tab = newTabName;
@@ -307,11 +316,11 @@ createDocumentButton.addEventListener("click", () => {
     }
 });
 
-renameDocumentButton.addEventListener("click", () => {
+renameTabButton.addEventListener("click", () => {
     renameTab(current_tab)
 });
 
-deleteDocumentButton.addEventListener("click", () => {
+deleteTabButton.addEventListener("click", () => {
     deleteTab(current_tab)
 });
 
@@ -349,13 +358,13 @@ function deleteTab(tab){
 // ADD LOAD LOCAL STORAGE
 // RENAME VARIABLES
 
-saveDocumentButton.addEventListener("click", () => {
+saveTabButton.addEventListener("click", () => {
     downlaodDocument(current_tab);
 });
 
 const fileInput = document.getElementById("fileInput");
 
-loadDocumentButton.addEventListener("click", () => {
+loadTabButton.addEventListener("click", () => {
     fileInput.click();
 });
 
