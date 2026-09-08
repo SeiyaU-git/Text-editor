@@ -154,10 +154,10 @@ let folder_info = {
     documents: []
 }
 
-let document_info = {};
-let current_document = "empty";
+let document_info = null;
+let current_document = null;
 
-let current_tab = "Title tab";
+let current_tab = null;
 
 // 📦 folder (Object)
 // │    
@@ -200,12 +200,7 @@ function createDocument(name){
     var doc_info = {
         name: name,
         saved: true,
-        tabs: [
-            {name: "1", innerHTML: "ALOT OF TEXT"},
-            {name: "2", innerHTML: "ALOT OF h"},
-            {name: "3", innerHTML: "ALOT OF b"},
-
-        ],
+        tabs: [],
     }
 
     folder_info.documents.push(doc_info)
@@ -233,7 +228,10 @@ function loadDocumentFolder(document_name) {
     let doc = getDocument(document_name);
     document_info = doc;
     current_document = document_info.name
-    current_tab = document_info.tabs[0].name
+    
+    if (document_info.tabs.length > 0) {
+        current_tab = document_info.tabs[0].name;
+    }
 }
 
 //#endregion
@@ -257,7 +255,7 @@ function createTab(document_name, name){
     
     doc.tabs.push(tab)
 
-    saveTabButton()
+    // saveTabDocument()
      
 }
 
@@ -283,6 +281,10 @@ function deleteTabDocument(document_name, name){
 }
 
 function saveTabDocument(tab_name = current_tab){
+    if (document_info.tabs.length <= 0) {
+        return
+    }
+    
     let doc = getDocument(current_document)
     const tab = getTab(current_document, tab_name)
     tab.innerHTML = editor.innerHTML
@@ -296,7 +298,11 @@ function saveTabDocument(tab_name = current_tab){
 
 const TabList = document.getElementsByClassName("tab_list")[0];
 
+const emptyDocScreen = document.getElementById("empty_document_screen")
+const emptyFolderScreen = document.getElementById("empty_folder_screen")
 function render(){
+
+    editor.classList.add("deactive")
     // if (!current_tab && document_info.size > 0) {
     //     current_tab = document_info.keys().next().value;
     // }
@@ -305,9 +311,22 @@ function render(){
     //     current_tab = document_info.keys().next().value;
     // }
     
- 
+    if (!folder_info.documents || folder_info.documents.length == 0){
+        emptyFolderScreen.classList.remove("deactive")
+        return
+    }
+    emptyFolderScreen.classList.add("deactive")
     renderDocumentList()
+
+    if (!document_info.tabs || document_info.tabs.length == 0){
+        emptyDocScreen.classList.remove("deactive")
+        return
+    }
+    emptyDocScreen.classList.add("deactive")
     renderTabList()
+    
+    
+    editor.classList.remove("deactive")
     renderTab(current_document, current_tab)
 }
 
@@ -366,9 +385,6 @@ function renderDocumentList(){
             current_document = this.dataset.docName
             loadDocumentFolder(current_document);
             
-            current_tab = document_info.tabs[0].name
-            renderTab(current_document, current_tab)
-
             render();
         });
     }
@@ -412,24 +428,30 @@ window.onbeforeunload = function(){
 }
 
 window.onload = function exampleFunction(){
+    folder_info = {
+        documents: []
+    }
     // localStorage.clear()
     loadFolderLocal();
-    folder_info = {
-        documents: [
-            {name: "doc", saved: false, tabs: [
-                {name: "1", innerHTML: "ALOT OF TEXT"},
-                {name: "2", innerHTML: "ALOT OF h"},
-                {name: "3", innerHTML: "ALOT OF b"},
-            ]}
-        ]
-    }
 
+    // folder_info = {
+    //     documents: [
+    //         {name: "doc", saved: false, tabs: [
+    //             {name: "1", innerHTML: "ALOT OF TEXT"},
+    //             {name: "2", innerHTML: "ALOT OF h"},
+    //             {name: "3", innerHTML: "ALOT OF b"},
+    //         ]}
+    //     ]
+    // }
+    if (folder_info.documents.length > 0) {
+        loadDocumentFolder(folder_info.documents[0].name);
+    }
     
 
-    current_document = folder_info.documents[0].name
-    document_info = folder_info.documents[0]
+    // current_document = folder_info.documents[0].name
+    // document_info = folder_info.documents[0]
 
-    current_tab = document_info.tabs[0].name
+    // current_tab = document_info.tabs[0].name
     render()
 }
 
@@ -553,9 +575,10 @@ createDocumentButton.addEventListener("click", () => {
         //     return;
         // }
 
-        saveTabDocument();
-         ;
-        
+        if(folder_info.documents.length > 0)
+        {
+            saveTabDocument(); 
+        }
         createDocument(NewDocName)
         loadDocumentFolder(NewDocName)
         // document_info = createDocument(NewDocName)

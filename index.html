@@ -68,9 +68,46 @@
     
 
     <main>
-     
-        <div id="editor" contenteditable="true" ></div>
+        <div id = "empty_document_screen" class = "deactive">
+            <h2>This document is empty</h2>
+            <button id="create_tab_btn">
+                <i class='bx bxs-file-plus'></i>
+                <span>New</span>
+            </button>
 
+            <button id="delete_tab_btn">
+                <i class='bx bxs-trash'></i>
+                <span>Delete</span>
+            </button>
+
+            <button id="save_tab_btn">
+                <i class='bx bxs-save' ></i>
+                <span>Save</span>
+            </button>
+
+            <button id="load_tab_btn">
+                <i class='bx bxs-file-import'></i>
+                <span>Load</span>
+            </button>
+
+            <button id="rename_tab_btn">
+                <i class='bx bxs-rename' ></i>
+                <span>Rename</span>
+            </button>
+        </div>
+
+        <div id = "empty_folder_screen">
+            <h2>This document is empty</h2>
+            <button id="create_document_btn">
+                <i class='bx bxs-file-plus'></i>
+                <span>New</span>
+            </button>
+        </div>
+
+        <div id="editor" contenteditable="true" class = "deactive"></div>
+
+
+        
 
         <script type="module" src="script.js"></script>
         <!-- <script type="module" src="editor.js"></script> -->
