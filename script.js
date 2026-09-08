@@ -305,9 +305,10 @@ function render(){
     //     current_tab = document_info.keys().next().value;
     // }
     
-    renderTab(current_document, current_tab)
-    renderTabList()
+ 
     renderDocumentList()
+    renderTabList()
+    renderTab(current_document, current_tab)
 }
 
 function renderTab(document_name, tab_name){
@@ -338,8 +339,7 @@ function renderTabList(){
         TabButton.addEventListener('click', function() {
             saveTabDocument();
             current_tab = this.dataset.tabName;
-            renderTab(current_document, current_tab)
-            renderTabList()
+            render()
 
             clearSnapshot();
             createSnapshot();
