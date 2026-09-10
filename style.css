@@ -43,16 +43,16 @@ main{
   flex-direction: column; */
 }
 
-main div{
-  max-width: 700px;        /* page-like width, not full screen */
-  margin: 40px auto;       /* centers it, gives "floating page" feel */
-  padding: 40px 80px;      /* generous inner margins, like a real doc */
-  min-height: 900px;       /* tall like a page */
-}
+/* main div{
+  max-width: 700px;       
+  margin: 40px auto;       
+  padding: 40px 80px;      
+  min-height: 900px;       
+} */
 
 #editor {
 
-  display: block;
+  /* display: block; */
 
   max-width: 700px;        /* page-like width, not full screen */
   margin: 40px auto;       /* centers it, gives "floating page" feel */

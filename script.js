@@ -307,14 +307,11 @@ const emptyDocScreen = document.getElementById("empty_document_screen")
 const emptyFolderScreen = document.getElementById("empty_folder_screen")
 function render(){
 
-    editor.classList.add("deactive")
-    // if (!current_tab && document_info.size > 0) {
-    //     current_tab = document_info.keys().next().value;
-    // }
+    //FOR NOW
+    TabList.innerHTML = ""
 
-    // if (!document_info.has(current_tab)) {
-    //     current_tab = document_info.keys().next().value;
-    // }
+    editor.classList.add("deactive")
+
     
     if (!folder_info.documents || folder_info.documents.length == 0){
         emptyFolderScreen.classList.remove("deactive")
