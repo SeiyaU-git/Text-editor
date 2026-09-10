@@ -512,18 +512,24 @@ deleteTabButton.addEventListener("click", () => {
 
 //#region document tab functions
 function renameTab(tab){
-    const newName = prompt("Enter a name for the document")
+    const newName = prompt("Enter a name for the tab")
 
-    if (newName){
-        if (tab == current_tab) current_tab = newName
-        renameTabDocument(current_document, tab, newName)
-        
-        render()
+    if (!newName){
+        return
     }
+    if(document_info.tabs.some(tab => tab.name === newName)){
+        alert("A tab with that name already exists.");
+        return;
+    }
+
+    if (tab == current_tab) current_tab = newName
+    renameTabDocument(current_document, tab, newName)
+    
+    render()
 }
 
 function deleteTab(tab){
-    if (confirm(`Are you sure you want to delete the document "${tab}"?`)) {
+    if (confirm(`Are you sure you want to delete the tab "${tab}"?`)) {
         deleteTabDocument(current_document, tab)
         
         if (tab === current_tab) {
@@ -618,12 +624,18 @@ renameDocumentButton.addEventListener("click", () => {
 function renameDocumentPrompt(doc_name){
     const newName = prompt("Enter a name for the DOCUMENT")
 
-    if (newName){
-        if (doc_name == current_document) current_document = newName
-        renameDocument(doc_name, newName)
-        
-        render()
+    if (! newName){
+        return
     }
+    if(folder_info.documents.some(doc => doc.name === newName)){
+        alert("A document with that name already exists.");
+        return;
+    }
+
+    if (doc_name == current_document) current_document = newName
+    renameDocument(doc_name, newName)
+    
+    render()
 }
 
 function deleteDocumentPrompt(doc_name){
