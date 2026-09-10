@@ -480,18 +480,22 @@ createTabButton.addEventListener("click", () => {
     const newTabName = prompt("Enter a name for the new document:");
 
     if (newTabName) {
-        if (document_info.tabs.some(tab => tab.name === newTabName)) {
-            alert("A document with that name already exists.");
-            return;
+
+        
+        var add_text = ""
+        var add_index = 1
+        while (document_info.tabs.some(tab => tab.name === newTabName + add_text)) {
+            add_index += 1
+            add_text = ` (${add_index})`
         }
 
         saveTabDocument(current_tab)
         document_info.tabs.push({
-            name: newTabName,
+            name: newTabName + add_text,
             innerHTML: "hello a new tab",
             saved: true,
         })
-        current_tab = newTabName;
+        current_tab = newTabName + add_text;
 
         render()
     }
@@ -581,17 +585,20 @@ createDocumentButton.addEventListener("click", () => {
     const NewDocName = prompt("Enter a name for the new document:");
 
     if (NewDocName) {
-        // if (folder_info.has(NewDocName)) {
-        //     alert("A document with that name already exists.");
-        //     return;
-        // }
+        var add_text = ""
+        var add_index = 1
+        while(folder_info.documents.some(doc => doc.name === NewDocName + add_text)){
+            add_index += 1
+            add_text = ` (${add_index})`
+        }
 
         if(folder_info.documents.length > 0)
         {
             saveTabDocument(); 
         }
-        createDocument(NewDocName)
-        loadDocumentFolder(NewDocName)
+
+        createDocument(NewDocName + add_text)
+        loadDocumentFolder(NewDocName + add_text)
         // document_info = createDocument(NewDocName)
 
 
