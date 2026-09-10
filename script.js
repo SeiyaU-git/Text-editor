@@ -8,7 +8,7 @@ const shortcuts = {
   'u': () => document.execCommand('underline'),
   'h': () => document.execCommand('formatBlock', false, '<h1>'),
   '8': () => document.execCommand('insertUnorderedList'),
-  's': () => saveToLocalStorage(),
+  's': () => saveFolderLocal(),
   'f': () => highlight(),
   'z': () => undo(),
 }
@@ -49,7 +49,7 @@ editor.addEventListener('keydown', (e) => {
         shortcuts[e.key]();
     }
 
-    if (e.key == "Enter" || e.key == "  " || e.key == "Return" || e.key === "Delete" || e.key === "Backspace") createSnapshot();
+    if (e.key == "Enter" || e.key === " " || e.key == "Return" || e.key === "Delete" || e.key === "Backspace") createSnapshot();
 })
 //#endregion
 
@@ -285,8 +285,13 @@ function saveTabDocument(tab_name = current_tab){
         return
     }
     
-    let doc = getDocument(current_document)
     const tab = getTab(current_document, tab_name)
+
+    if (!tab) {
+        return
+    }
+
+
     tab.innerHTML = editor.innerHTML
 }
 
@@ -335,6 +340,7 @@ function renderTab(document_name, tab_name){
     editor.innerHTML = ""
     let doc = getDocument(document_name)
     const tab = getTab(document_name, tab_name)
+    if(!tab) return
     editor.innerHTML = tab.innerHTML
 }
 
@@ -517,7 +523,9 @@ function deleteTab(tab){
         deleteTabDocument(current_document, tab)
         
         if (tab === current_tab) {
-            current_tab = document_info.tabs[0].name
+            current_tab = document_info.tabs.length > 0
+                ? document_info.tabs[0].name
+                : null;
         }
 
         render()
@@ -565,6 +573,9 @@ fileInput.addEventListener("change", (event) => {
 
 
 const createDocumentButton = document.getElementById("create_document_btn");
+const deleteDocumentButton = document.getElementById("delete_document_btn");
+const renameDocumentButton = document.getElementById("rename_document_btn");
+
 
 createDocumentButton.addEventListener("click", () => {
     const NewDocName = prompt("Enter a name for the new document:");
@@ -588,13 +599,37 @@ createDocumentButton.addEventListener("click", () => {
     }
 });
 
+deleteDocumentButton.addEventListener("click", () => {
+    deleteDocumentPrompt(current_document)
+});
+
+renameDocumentButton.addEventListener("click", () => {
+    renameDocumentPrompt(current_document)
+});
 
 
+function renameDocumentPrompt(doc_name){
+    const newName = prompt("Enter a name for the DOCUMENT")
 
+    if (newName){
+        if (doc_name == current_document) current_document = newName
+        renameDocument(doc_name, newName)
+        
+        render()
+    }
+}
 
+function deleteDocumentPrompt(doc_name){
+    if (confirm(`Are you sure you want to delete the DOCUMENT "${doc_name}"?`)) {
+        deleteDocument(doc_name)
+        
+        if (doc_name === current_document && folder_info.documents.length > 0) {
+            current_document = folder_info.documents[0].name
+        }
 
-
-
+        render()
+    }
+}
 
 
 

@@ -17,18 +17,29 @@
         <button class = "sidebar_collapse"><i class='bx bx-sidebar'></i></button>
         <nav>
             <h2>DOCUMENTS</h2>
+            <div class="document_btns">
+                <button id="create_document_btn">
+                    <i class='bx bxs-file-plus'></i>
+                    <span>New</span>
+                </button>
+
+                <button id="delete_document_btn">
+                    <i class='bx bxs-trash'></i>
+                    <span>Delete</span>
+                </button>
+
+                <button id="rename_document_btn">
+                    <i class='bx bxs-rename' ></i>
+                    <span>Rename</span>
+                </button>
+            </div>
             <ul class = "document_list">
                 
             </ul>
 
 
             <h2>DOCUMENT TABS</h2>
-            <div class="document_btns">
-                <button id="create_document_btn">
-                    <i class='bx bxs-file-plus'></i>
-                    <span>New</span>
-                </button>
-            </div> 
+ 
             <ul class = "tab_list">
                 
             </ul>
@@ -46,6 +57,11 @@
                 <span>Delete</span>
             </button>
 
+            <button id="rename_tab_btn">
+                <i class='bx bxs-rename' ></i>
+                <span>Rename</span>
+            </button>
+
             <button id="save_tab_btn">
                 <i class='bx bxs-save' ></i>
                 <span>Save</span>
@@ -54,11 +70,6 @@
             <button id="load_tab_btn">
                 <i class='bx bxs-file-import'></i>
                 <span>Load</span>
-            </button>
-
-            <button id="rename_tab_btn">
-                <i class='bx bxs-rename' ></i>
-                <span>Rename</span>
             </button>
         
         </div>
