@@ -303,8 +303,8 @@ function saveTabDocument(tab_name = current_tab){
 
 const TabList = document.getElementsByClassName("tab_list")[0];
 
-const emptyDocScreen = document.getElementById("empty_document_screen")
-const emptyFolderScreen = document.getElementById("empty_folder_screen")
+const emptyDocState = document.getElementById("empty_document_state")
+const emptyFolderState = document.getElementById("empty_folder_state")
 function render(){
 
     //FOR NOW
@@ -314,17 +314,17 @@ function render(){
 
     
     if (!folder_info.documents || folder_info.documents.length == 0){
-        emptyFolderScreen.classList.remove("deactive")
+        emptyFolderState.classList.remove("deactive")
         return
     }
-    emptyFolderScreen.classList.add("deactive")
+    emptyFolderState.classList.add("deactive")
     renderDocumentList()
 
     if (!document_info.tabs || document_info.tabs.length == 0){
-        emptyDocScreen.classList.remove("deactive")
+        emptyDocState.classList.remove("deactive")
         return
     }
-    emptyDocScreen.classList.add("deactive")
+    emptyDocState.classList.add("deactive")
     renderTabList()
     
     
@@ -464,16 +464,43 @@ let intervalId = setInterval(function() {
 }, 25000);
 
 
+const saveTabButton = document.querySelector(".save_tab_btn");
+const loadTabButton = document.querySelector(".load_tab_btn");
+document.addEventListener("click", (e) => {
+    const button = e.target.closest("[data-action]");
+    if (!button) return;
 
-const createTabButton = document.getElementById("create_tab_btn");
-const deleteTabButton = document.getElementById("delete_tab_btn");
-const saveTabButton = document.getElementById("save_tab_btn");
-const loadTabButton = document.getElementById("load_tab_btn");
-const renameTabButton = document.getElementById("rename_tab_btn")
+    const action = button.dataset.action;
 
+    switch (action) {
+        case "create-tab":
+            createTabPrompt();
+            break;
 
+        case "rename-tab":
+            renameTabPrompt(current_tab);
+            break;
+        
+        case "delete-tab":
+            deleteTabPrompt(current_tab);
+            break;
+        
+        case "create-document":
+            createDocumentPrompt();
+            break;
+        
+        case "rename-document":
+            renameDocumentPrompt(current_document);
+            break;
+        
+        case "delete-document":
+            deleteDocumentPrompt(current_document);
+            break;
+    }
+})
 
-createTabButton.addEventListener("click", () => {
+//#region Prompt functions
+function createTabPrompt(){
     const newTabName = prompt("Enter a name for the new document:");
 
     if (newTabName) {
@@ -496,19 +523,9 @@ createTabButton.addEventListener("click", () => {
 
         render()
     }
-});
+};
 
-renameTabButton.addEventListener("click", () => {
-    renameTab(current_tab)
-});
-
-deleteTabButton.addEventListener("click", () => {
-    deleteTab(current_tab)
-});
-
-
-//#region document tab functions
-function renameTab(tab){
+function renameTabPrompt(tab){
     const newName = prompt("Enter a name for the tab")
 
     if (!newName){
@@ -525,7 +542,7 @@ function renameTab(tab){
     render()
 }
 
-function deleteTab(tab){
+function deleteTabPrompt(tab){
     if (confirm(`Are you sure you want to delete the tab "${tab}"?`)) {
         deleteTabDocument(current_document, tab)
         
@@ -578,13 +595,8 @@ fileInput.addEventListener("change", (event) => {
     createSnapshot();
 });
 
-
-const createDocumentButton = document.getElementById("create_document_btn");
-const deleteDocumentButton = document.getElementById("delete_document_btn");
-const renameDocumentButton = document.getElementById("rename_document_btn");
-
-
-createDocumentButton.addEventListener("click", () => {
+//#region Document Prompt Functions
+function createDocumentPrompt(){
     const NewDocName = prompt("Enter a name for the new document:");
 
     if (NewDocName) {
@@ -607,16 +619,7 @@ createDocumentButton.addEventListener("click", () => {
 
         render();
     }
-});
-
-deleteDocumentButton.addEventListener("click", () => {
-    deleteDocumentPrompt(current_document)
-});
-
-renameDocumentButton.addEventListener("click", () => {
-    renameDocumentPrompt(current_document)
-});
-
+};
 
 function renameDocumentPrompt(doc_name){
     const newName = prompt("Enter a name for the DOCUMENT")
@@ -646,6 +649,7 @@ function deleteDocumentPrompt(doc_name){
         render()
     }
 }
+//#endregion
 
 
 
