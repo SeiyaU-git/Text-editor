@@ -78,8 +78,9 @@ main{
 }
 
 .empty_state{
+  align-items: center;
   max-width: 700px;        /* page-like width, not full screen */
-  margin: 40px auto;       /* centers it, gives "floating page" feel */
+  margin: 80px 240px;       /* centers it, gives "floating page" feel */
 }
 
 

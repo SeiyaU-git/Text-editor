@@ -18,19 +18,29 @@
         <nav>
             <h2>DOCUMENTS</h2>
             <div class="document_btns">
-                <button class="create_document_btn" data-action="create-document">
+                <button data-action="create-document">
                     <i class='bx bxs-file-plus'></i>
                     <span>New</span>
                 </button>
 
-                <button class="delete_document_btn" data-action="delete-document">
+                <button data-action="delete-document">
                     <i class='bx bxs-trash'></i>
                     <span>Delete</span>
                 </button>
 
-                <button class="rename_document_btn" data-action="rename-document">
+                <button data-action="rename-document">
                     <i class='bx bxs-rename' ></i>
                     <span>Rename</span>
+                </button>
+
+                <button data-action="download-document">
+                    <i class='bx bxs-save' ></i>
+                    <span>Save</span>
+                </button>
+
+                <button data-action="load-document">
+                    <i class='bx bxs-file-import'></i>
+                    <span>Load</span>
                 </button>
             </div>
             <ul class = "document_list">
@@ -47,17 +57,17 @@
         </nav>
         
         <div class="tab_btns">
-            <button class="create_tab_btn" data-action="create-tab">
+            <button data-action="create-tab">
                 <i class='bx bxs-file-plus'></i>
                 <span>New</span>
             </button>
 
-            <button class="delete_tab_btn" data-action="delete-tab">
+            <button data-action="delete-tab">
                 <i class='bx bxs-trash'></i>
                 <span>Delete</span>
             </button>
 
-            <button class="rename_tab_btn" data-action="rename-tab">
+            <button data-action="rename-tab">
                 <i class='bx bxs-rename' ></i>
                 <span>Rename</span>
             </button>
@@ -80,13 +90,13 @@
 
     <main>
         <div id = "empty_document_state" class = "deactive empty_state">
-            <h2>This document is empty</h2>
-            <button class="create_tab_btn" data-action="create-tab">
+            <h2>This project is empty</h2>
+            <button data-action="create-tab">
                 <i class='bx bxs-file-plus'></i>
                 <span>New</span>
             </button>
 
-            <button class="delete_tab_btn" data-action="delete-tab">
+            <button data-action="delete-tab">
                 <i class='bx bxs-trash'></i>
                 <span>Delete</span>
             </button>
@@ -101,15 +111,15 @@
                 <span>Load</span>
             </button>
 
-            <button class="rename_tab_btn" data-action="rename-tab">
+            <button data-action="rename-tab">
                 <i class='bx bxs-rename' ></i>
                 <span>Rename</span>
             </button>
         </div>
 
         <div id = "empty_folder_state" class = "empty_state">
-            <h2>This document is empty</h2>
-            <button class="create_document_btn" data-action="create-document">
+            <h2>Welcome to the document editor</h2>
+            <button data-action="create-document">
                 <i class='bx bxs-file-plus'></i>
                 <span>New</span>
             </button>
@@ -123,8 +133,8 @@
         <script type="module" src="script.js"></script>
         <!-- <script type="module" src="editor.js"></script> -->
 
-        <input type="file" id="fileInput" accept=".txt" hidden>
-
+        <!-- <input type="file" id="fileInput" accept=".txt" hidden> -->
+        <input type="file" id="fileInput" accept=".json" hidden>
         
 
 
@@ -169,8 +179,10 @@
 
         <div class = "context_menu tab_context_menu">
         <ul>
-            <li><button class = "tab_context_btn" data-func = "delete"> Delete</button></li>
+            <li><button class = "tab_context_btn" data-func = "create"> Create</button></li>
             <li><button class = "tab_context_btn" data-func = "rename"> Rename</button></li>
+            <li><button class = "tab_context_btn" data-func = "delete"> Delete</button></li>
+            
             <li><button class = "tab_context_btn" data-func = "save"> Save</button></li>
         </ul>
     </div>

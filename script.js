@@ -80,26 +80,35 @@ var selected_tab = ""
 document.addEventListener("contextmenu", (e) => {
     tabContextMenu.classList.remove("active");
     documentContextMenu.classList.remove("active");
-  const tabButtons = document.getElementsByClassName("document_tab_btn");
-  Array.from(tabButtons).forEach((tabButton) => {
-    tabButton.classList.remove("selected");
-  });
 
-  if (editor.contains(e.target)){
-    e.preventDefault();
-    documentContextMenu.style.left = `${e.clientX}px`;
-    documentContextMenu.style.top = `${e.clientY}px`;
-    documentContextMenu.classList.add("active"); 
-    
-  }else if (e.target.classList.contains("document_tab_btn")){
-    e.preventDefault();
-    tabContextMenu.style.left = "200px";
-    tabContextMenu.style.top = `${e.clientY}px`;
-    tabContextMenu.classList.add("active"); 
+    const tabButtons = document.getElementsByClassName("document_tab_btn");
 
-    selected_tab = e.target.dataset.tabName;
-    e.target.classList.add("selected")
-  }
+    Array.from(tabButtons).forEach((tabButton) => {
+        tabButton.classList.remove("selected");
+    });
+
+    if (editor.contains(e.target)) {
+        e.preventDefault();
+
+        documentContextMenu.style.left = `${e.clientX}px`;
+        documentContextMenu.style.top = `${e.clientY}px`;
+        documentContextMenu.classList.add("active");
+
+        return;
+    }
+
+    const tabButton = e.target.closest(".document_tab_btn");
+
+    if (tabButton) {
+        e.preventDefault();
+
+        tabContextMenu.style.left = "200px";
+        tabContextMenu.style.top = `${e.clientY}px`;
+        tabContextMenu.classList.add("active");
+
+        selected_tab = tabButton.dataset.tabName;
+        tabButton.classList.add("selected");
+    }
 });
 
 window.addEventListener("click", () => {
@@ -133,9 +142,10 @@ document.querySelectorAll(".tab_context_btn").forEach(button => {
         tabContextMenu.classList.remove("active");
 
         switch(this.dataset.func){
+            case "create": createTabPrompt(); break;
             case "delete": deleteTab(selected_tab); break;
             case "rename": renameTab(selected_tab); break;
-            case "save": downlaodDocument(selected_tab); break;
+            case "save": downloadTab(selected_tab); break;
         }
 
         const tabButtons = document.getElementsByClassName("document_tab_btn");
@@ -309,6 +319,7 @@ function render(){
 
     //FOR NOW
     TabList.innerHTML = ""
+    documentList.innerHTML = ""
 
     editor.classList.add("deactive")
 
@@ -413,7 +424,7 @@ sidebarCollapseBtn.addEventListener("click", () => {
 
 
 
-function downlaodDocument(tab) {
+function downloadTab(tab) {
     saveTabDocument(tab);
     const text = document_info.get(tab)
     const blob = new Blob([text], {type : "text/plain"})
@@ -426,6 +437,7 @@ function downlaodDocument(tab) {
 
 //#endregion
 
+//#region browser events
 window.onbeforeunload = function(){
    saveFolderLocal();
 }
@@ -437,15 +449,6 @@ window.onload = function exampleFunction(){
     // localStorage.clear()
     loadFolderLocal();
 
-    // folder_info = {
-    //     documents: [
-    //         {name: "doc", saved: false, tabs: [
-    //             {name: "1", innerHTML: "ALOT OF TEXT"},
-    //             {name: "2", innerHTML: "ALOT OF h"},
-    //             {name: "3", innerHTML: "ALOT OF b"},
-    //         ]}
-    //     ]
-    // }
     if (folder_info.documents.length > 0) {
         loadDocumentFolder(folder_info.documents[0].name);
     }
@@ -458,10 +461,13 @@ window.onload = function exampleFunction(){
     render()
 }
 
-
 let intervalId = setInterval(function() {
   saveFolderLocal();
 }, 25000);
+
+//#endregion
+
+
 
 
 const saveTabButton = document.querySelector(".save_tab_btn");
@@ -496,10 +502,18 @@ document.addEventListener("click", (e) => {
         case "delete-document":
             deleteDocumentPrompt(current_document);
             break;
+
+        case "download-document":
+            downloadDocument(current_document);
+            break;
+        
+        case "load-document":
+            fileInput.click();
+            break;
     }
 })
 
-//#region Prompt functions
+//#region tab Prompt functions
 function createTabPrompt(){
     const newTabName = prompt("Enter a name for the new document:");
 
@@ -516,7 +530,7 @@ function createTabPrompt(){
         saveTabDocument(current_tab)
         document_info.tabs.push({
             name: newTabName + add_text,
-            innerHTML: "hello a new tab",
+            innerHTML: "",
             saved: true,
         })
         current_tab = newTabName + add_text;
@@ -565,35 +579,37 @@ function deleteTabPrompt(tab){
 // RENAME VARIABLES
 
 saveTabButton.addEventListener("click", () => {
-    downlaodDocument(current_tab);
+    downloadTab(current_tab);
 });
 
-const fileInput = document.getElementById("fileInput");
 
-loadTabButton.addEventListener("click", () => {
-    fileInput.click();
-});
+//FIX NOW BROKEn
+// const fileInput = document.getElementById("fileInput");
 
-fileInput.addEventListener("change", (event) => {
-    const file = event.target.files[0];
-    if (!file) return;
+// loadTabButton.addEventListener("click", () => {
+//     fileInput.click();
+// });
 
-    const reader = new FileReader();
-    reader.onload = () => {
-        const file_name = file.name.replace(/\.[^/.]+$/, "");
-        document_info.tabs.push({
-            name: file_name,
-            innerHTML: reader.result,
-            saved: true,
-        });
-        current_tab = file_name;
-        render()
-    }
-    reader.readAsText(file);
+// fileInput.addEventListener("change", (event) => {
+//     const file = event.target.files[0];
+//     if (!file) return;
 
-    clearSnapshot();
-    createSnapshot();
-});
+//     const reader = new FileReader();
+//     reader.onload = () => {
+//         const file_name = file.name.replace(/\.[^/.]+$/, "");
+//         document_info.tabs.push({
+//             name: file_name,
+//             innerHTML: reader.result,
+//             saved: true,
+//         });
+//         current_tab = file_name;
+//         render()
+//     }
+//     reader.readAsText(file);
+
+//     clearSnapshot();
+//     createSnapshot();
+// });
 
 //#region Document Prompt Functions
 function createDocumentPrompt(){
@@ -649,10 +665,52 @@ function deleteDocumentPrompt(doc_name){
         render()
     }
 }
+
+function downloadDocument(doc_name) {
+    saveTabDocument(current_tab);
+    const doc = getDocument(doc_name);
+
+    var jason_info = JSON.stringify(doc)
+
+    const blob = new Blob([jason_info], {
+        type: "application/json"
+    })
+
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `${doc.name}.json`;
+    link.click();
+    link.revokeObjectURL(link.href)
+}
 //#endregion
 
+const fileInput = document.getElementById("fileInput");
+fileInput.addEventListener("change", (event) => {
 
+    const file = event.target.files[0];
 
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+
+        const json_info = JSON.parse(reader.result);
+
+        folder_info.documents.push(json_info);
+
+        current_document = json_info.name;
+
+        loadDocumentFolder(current_document);
+
+        render();
+
+        clearSnapshot();
+        createSnapshot();
+    };
+
+    reader.readAsText(file);
+});
 
 
 
