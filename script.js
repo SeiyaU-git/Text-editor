@@ -680,7 +680,7 @@ saveTabButton.addEventListener("click", () => {
 
 //#region Document Prompt Functions
 function createDocumentPrompt(){
-    const NewDocName = prompt("Enter a name for the new document:");
+    const NewDocName = cleanName(prompt("Enter a name for the new document:"));
 
     if (NewDocName) {
         var add_text = ""
@@ -705,7 +705,7 @@ function createDocumentPrompt(){
 };
 
 function renameDocumentPrompt(doc_name){
-    const newName = prompt("Enter a name for the DOCUMENT")
+    const newName = cleanName(prompt("Enter a name for the DOCUMENT"));
 
     if (! newName){
         return
