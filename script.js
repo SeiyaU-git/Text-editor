@@ -371,13 +371,6 @@ function saveTabDocument(tab_name = current_tab){
 
 //#region RENDER
 
-function cleanName(name) {
-    const div = document.createElement("div");
-    div.textContent = name;
-    return div.textContent;
-}
-
-
 const TabList = document.getElementsByClassName("tab_list")[0];
 
 const emptyDocState = document.getElementById("empty_document_state")
@@ -430,7 +423,16 @@ function renderTabList(){
         const TabButton = document.createElement("button");
         TabButton.classList.add("document_tab_btn");
         TabButton.dataset.tabName = tab.name;
-        TabButton.innerHTML = `<i class='bx bxs-file-doc'></i> <span>${tab.name}<span>`;
+        
+        const icon = document.createElement("i");
+        icon.classList.add("bx", "bxs-file-doc");
+
+        const name = document.createElement("span");
+        name.textContent = tab.name;
+
+        TabButton.appendChild(icon);
+        TabButton.appendChild(name);
+        
         TabList.appendChild(TabButton);
         
         // ADD THE ACTIVE CLASS
@@ -454,7 +456,16 @@ function renderDocumentList(){
         let docBtn = document.createElement("button");
         docBtn.classList.add("document_btn");
         docBtn.dataset.docName = doc.name;
-        docBtn.innerHTML = `<i class='bx bxs-file-doc'></i> <span>${doc.name}<span>`;
+        
+        const icon = document.createElement("i");
+        icon.classList.add("bx", "bxs-file-doc");
+
+        const name = document.createElement("span");
+        name.textContent = doc.name;
+
+        docBtn.appendChild(icon);
+        docBtn.appendChild(name);
+        
         documentList.appendChild(docBtn);
 
         if (doc.name === current_document) docBtn.classList.add("current");
@@ -582,7 +593,7 @@ document.addEventListener("click", (e) => {
 
 //#region tab Prompt functions
 function createTabPrompt(){
-    const newTabName = cleanName(prompt("Enter a name for the new document:"));
+    const newTabName = prompt("Enter a name for the new document:");
 
     if (newTabName) {
 
@@ -607,7 +618,7 @@ function createTabPrompt(){
 };
 
 function renameTabPrompt(tab){
-    const newName = cleanName(prompt("Enter a name for the tab"))
+    const newName = prompt("Enter a name for the tab")
 
     if (!newName){
         return
@@ -680,7 +691,7 @@ saveTabButton.addEventListener("click", () => {
 
 //#region Document Prompt Functions
 function createDocumentPrompt(){
-    const NewDocName = cleanName(prompt("Enter a name for the new document:"));
+    const NewDocName = prompt("Enter a name for the new document:");
 
     if (NewDocName) {
         var add_text = ""
@@ -705,7 +716,7 @@ function createDocumentPrompt(){
 };
 
 function renameDocumentPrompt(doc_name){
-    const newName = cleanName(prompt("Enter a name for the DOCUMENT"));
+    const newName = prompt("Enter a name for the DOCUMENT");
 
     if (! newName){
         return
