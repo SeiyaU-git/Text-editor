@@ -447,11 +447,15 @@ function renderTabList(){
             createSnapshot();
         });
     }
+
+
+    TabList.innerHTML += '<button data-action="create-tab"><i class="bx bxs-file-plus"></i><span>New</span></button>'
 }
 
 let documentList = document.getElementsByClassName("document_list")[0];
 function renderDocumentList(){
     documentList.innerHTML = ""
+    
     for (let doc of folder_info.documents) {
         let docBtn = document.createElement("button");
         docBtn.classList.add("document_btn");
@@ -480,6 +484,8 @@ function renderDocumentList(){
             render();
         });
     }
+
+    documentList.innerHTML += '<button data-action="create-document"><i class="bx bxs-file-plus"></i><span>New</span></button>'
 }
 
 //#endregion
