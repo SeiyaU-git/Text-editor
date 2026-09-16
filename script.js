@@ -18,6 +18,8 @@ const shortcuts = {
 let document_history = []
 let history_index = -1  
 
+// let cursor_history = []
+
 function undo(){
     history_index -= 1
     if (history_index < 0) return
@@ -34,10 +36,13 @@ function redo(){
 export function createSnapshot(){
     history_index += 1
     document_history[history_index] = editor.innerHTML;
+    // cursor_history[history_index] = 
 }
+
 
 export function clearSnapshot(){
     document_history = []
+    // cursor_history = []
     history_index = -1  
 }
 
@@ -72,14 +77,17 @@ export function highlight(){
 
 
 //#region Context Menu
-let documentContextMenu = document.getElementsByClassName("document_context_menu")[0];
+const editorContextMenu = document.getElementsByClassName("editor_context_menu")[0];
 const tabContextMenu = document.getElementsByClassName("tab_context_menu")[0]
+const docContextMenu = document.getElementsByClassName("document_context_menu")[0]
 
 var selected_tab = ""
+var selected_document = ""
 
 document.addEventListener("contextmenu", (e) => {
     tabContextMenu.classList.remove("active");
-    documentContextMenu.classList.remove("active");
+    editorContextMenu.classList.remove("active");
+    docContextMenu.classList.remove("active");
 
     const tabButtons = document.getElementsByClassName("document_tab_btn");
 
@@ -87,12 +95,19 @@ document.addEventListener("contextmenu", (e) => {
         tabButton.classList.remove("selected");
     });
 
+    const docButtons = document.getElementsByClassName("document_btn");
+
+    Array.from(docButtons).forEach((docButton) => {
+        docButton.classList.remove("selected");
+    });
+
+
     if (editor.contains(e.target)) {
         e.preventDefault();
 
-        documentContextMenu.style.left = `${e.clientX}px`;
-        documentContextMenu.style.top = `${e.clientY}px`;
-        documentContextMenu.classList.add("active");
+        editorContextMenu.style.left = `${e.clientX}px`;
+        editorContextMenu.style.top = `${e.clientY}px`;
+        editorContextMenu.classList.add("active");
 
         return;
     }
@@ -109,28 +124,47 @@ document.addEventListener("contextmenu", (e) => {
         selected_tab = tabButton.dataset.tabName;
         tabButton.classList.add("selected");
     }
+
+    const docButton = e.target.closest(".document_btn");
+
+    if (docButton) {
+        e.preventDefault();
+
+        docContextMenu.style.left = "200px";
+        docContextMenu.style.top = `${e.clientY}px`;
+        docContextMenu.classList.add("active");
+
+        selected_document = docButton.dataset.docName;
+        docButton.classList.add("selected");
+    }
 });
 
 window.addEventListener("click", () => {
-    documentContextMenu.classList.remove("active")
+    editorContextMenu.classList.remove("active")
     tabContextMenu.classList.remove("active")
+    docContextMenu.classList.remove("active")
     const tabButtons = document.getElementsByClassName("document_tab_btn");
     Array.from(tabButtons).forEach((tabButton) => {
         tabButton.classList.remove("selected");
     });
+
+    const docButtons = document.getElementsByClassName("document_btn");
+    Array.from(docButtons).forEach((docButton) => {
+        docButton.classList.remove("selected");
+    });
 })
 
 
-document.querySelectorAll(".doc_context_btn").forEach(button => {
+document.querySelectorAll(".editor_context_btn").forEach(button => {
     button.addEventListener("click", function() {
-        documentContextMenu.classList.remove("active");
+        editorContextMenu.classList.remove("active");
 
         switch(this.dataset.func){
             case "bold": document.execCommand("bold"); break;
             case "italics": document.execCommand("italic"); break;
             case "header": document.execCommand("formatBlock", false, "<h1>"); break;
             case "list": document.execCommand("insertUnorderedList"); break;
-            case "underline": document.execCommand("underline"); break;
+            case "un-line": document.execCommand("underline"); break;
             case "strike": document.execCommand("strikeThrough"); break;
             case "highlight": highlight(); break;
         }
@@ -154,6 +188,25 @@ document.querySelectorAll(".tab_context_btn").forEach(button => {
         });
     });
 });
+
+document.querySelectorAll(".document_context_btn").forEach(button => {
+    button.addEventListener("click", function() {
+        docContextMenu.classList.remove("active");
+
+        switch(this.dataset.func){ 
+            case "create": createDocumentPrompt(); break;
+            case "delete": deleteDocumentPrompt(selected_document); break;
+            case "rename": renameDocumentPrompt(selected_document); break;
+        }
+
+        const docButtons = document.getElementsByClassName("document_btn");
+        Array.from(docButtons).forEach((docButton) => {
+            docButton.classList.remove("selected");
+        });
+    });
+});
+
+
 //#endregion
 //#endregion
 
@@ -396,6 +449,7 @@ function renderDocumentList(){
 
         //FIIIIX NOWWWWW FIX NOWW
         docBtn.addEventListener('click', function() {
+            saveTabDocument()
             current_document = this.dataset.docName
             loadDocumentFolder(current_document);
             
