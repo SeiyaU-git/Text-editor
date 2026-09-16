@@ -280,6 +280,14 @@ function deleteDocument(name){ //NOT WORKING YET
     );
 
     folder_info.documents.splice(index, 1)
+
+    if (folder_info.documents.length > 0){
+        current_document = folder_info.documents[0].name
+    }
+
+    if (document_info.tabs.length > 0) {
+        current_tab = document_info.tabs[0].name;
+    }
 }
 
 function renameDocument(name, new_name){
@@ -363,6 +371,12 @@ function saveTabDocument(tab_name = current_tab){
 
 //#region RENDER
 
+function cleanName(name) {
+    const div = document.createElement("div");
+    div.textContent = name;
+    return div.textContent;
+}
+
 
 const TabList = document.getElementsByClassName("tab_list")[0];
 
@@ -429,7 +443,6 @@ function renderTabList(){
 
             clearSnapshot();
             createSnapshot();
-            console.log(current_tab);
         });
     }
 }
@@ -569,7 +582,7 @@ document.addEventListener("click", (e) => {
 
 //#region tab Prompt functions
 function createTabPrompt(){
-    const newTabName = prompt("Enter a name for the new document:");
+    const newTabName = cleanName(prompt("Enter a name for the new document:"));
 
     if (newTabName) {
 
@@ -594,7 +607,7 @@ function createTabPrompt(){
 };
 
 function renameTabPrompt(tab){
-    const newName = prompt("Enter a name for the tab")
+    const newName = cleanName(prompt("Enter a name for the tab"))
 
     if (!newName){
         return
