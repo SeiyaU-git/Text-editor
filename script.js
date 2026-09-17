@@ -272,21 +272,23 @@ function createDocument(name){
     
 }
 
-function deleteDocument(name){ //NOT WORKING YET
-    let doc = getDocument(name);
+function deleteDocument(name){
+    const doc = getDocument(name);
 
     const index = folder_info.documents.findIndex(
         item => item === doc
     );
 
-    folder_info.documents.splice(index, 1)
+    if (index === -1) return;
 
-    if (folder_info.documents.length > 0){
-        current_document = folder_info.documents[0].name
-    }
+    folder_info.documents.splice(index, 1);
 
-    if (document_info.tabs.length > 0) {
-        current_tab = document_info.tabs[0].name;
+    if (folder_info.documents.length > 0) {
+        loadDocumentFolder(folder_info.documents[0].name);
+    } else {
+        document_info = null;
+        current_document = null;
+        current_tab = null;
     }
 }
 
@@ -378,8 +380,8 @@ const emptyFolderState = document.getElementById("empty_folder_state")
 function render(){
 
     //FOR NOW
-    TabList.innerHTML = ""
-    documentList.innerHTML = ""
+    TabList.innerHTML = '<button data-action="create-tab"><i class="bx bxs-file-plus"></i><span>New</span></button>'
+    documentList.innerHTML = '<button data-action="create-document"><i class="bx bxs-file-plus"></i><span>New</span></button>'
 
     editor.classList.add("deactive")
 
@@ -594,6 +596,13 @@ document.addEventListener("click", (e) => {
         case "load-document":
             fileInput.click();
             break;
+        
+        case "close-document":
+            saveTabDocument(current_tab);
+            downloadDocument(current_document);
+            deleteDocument(current_document);
+            render();
+            break;
     }
 })
 
@@ -738,14 +747,10 @@ function renameDocumentPrompt(doc_name){
     render()
 }
 
-function deleteDocumentPrompt(doc_name){
+function deleteDocumentPrompt(doc_name,){
     if (confirm(`Are you sure you want to delete the DOCUMENT "${doc_name}"?`)) {
         deleteDocument(doc_name)
         
-        if (doc_name === current_document && folder_info.documents.length > 0) {
-            current_document = folder_info.documents[0].name
-        }
-
         render()
     }
 }
@@ -764,7 +769,7 @@ function downloadDocument(doc_name) {
     link.href = URL.createObjectURL(blob);
     link.download = `${doc.name}.json`;
     link.click();
-    link.revokeObjectURL(link.href)
+    URL.revokeObjectURL(link.href)
 }
 //#endregion
 
