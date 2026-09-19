@@ -783,7 +783,9 @@ function deleteDocumentPrompt(documentName){
 
 function downloadDocument(documentName) {
     saveTabDocument(current_tab);
-    const documentData = getDocument(documentName);
+    let documentData = getDocument(documentName);
+
+    documentData.type = "txtdoc";
 
     const documentJson = JSON.stringify(documentData)
 
@@ -807,6 +809,8 @@ fileInput.addEventListener("change", (event) => {
 
     if (!file) return;
 
+    const fileExtension = file.name.split(".").pop().toLowerCase();
+
     if (fileExtension !== "json") {
         alert("Invalid file type. Please select a JSON document.");
         fileInput.value = "";
@@ -817,23 +821,36 @@ fileInput.addEventListener("change", (event) => {
 
     reader.onload = () => {
 
-        const documentData = JSON.parse(reader.result);
+        try {
+            const documentData = JSON.parse(reader.result);
+            //documentData.type !== "txtdoc" ||
+            if (typeof documentData.name !== "string" ||
+                !Array.isArray(documentData.tabs)) {
 
-        folder_info.documents.push(documentData);
+                alert("Invalid document format. Please select a valid document created by this program.");
+                fileInput.value = "";
+                return;
+            }
 
-        current_document = documentData.name;
+            folder_info.documents.push(documentData);
 
-        loadDocumentFolder(current_document);
+            current_document = documentData.name;
 
-        render();
+            loadDocumentFolder(current_document);
 
-        clearSnapshot();
-        createSnapshot();
+            render();
+
+            clearSnapshot();
+            createSnapshot();
+
+        } catch (error) {
+            alert("Invalid file. The selected file is not valid JSON.");
+            fileInput.value = "";
+        }
     };
 
     reader.readAsText(file);
 });
-
 
 
 

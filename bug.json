@@ -1,0 +1,7 @@
+{
+    "bob": {
+        "name": "Bob",
+        "age": 30,
+        "occupation": "Engineer"
+    }
+}
