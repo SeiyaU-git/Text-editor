@@ -1,6 +1,7 @@
 const editor = document.getElementById("editor")
 
 
+
 //#region EDITOR
 const shortcuts = {
   'b': () => document.execCommand('bold'),
@@ -211,6 +212,7 @@ document.querySelectorAll(".document_context_btn").forEach(button => {
 //#endregion
 
 
+let document_save_point = new Map();
 
 
 let folder_info = {
@@ -451,7 +453,7 @@ function renderTabList(){
     }
 
 
-    TabList.innerHTML += '<button data-action="create-tab"><i class="bx bxs-file-plus"></i><span>New</span></button>'
+    // TabList.innerHTML += '<button data-action="create-tab"><i class="bx bxs-file-plus"></i><span>New</span></button>'
 }
 
 let documentList = document.getElementsByClassName("document_list")[0];
@@ -487,7 +489,7 @@ function renderDocumentList(){
         });
     }
 
-    documentList.innerHTML += '<button data-action="create-document"><i class="bx bxs-file-plus"></i><span>New</span></button>'
+    // documentList.innerHTML += '<button data-action="create-document"><i class="bx bxs-file-plus"></i><span>New</span></button>'
 }
 
 //#endregion
@@ -603,6 +605,11 @@ document.addEventListener("click", (e) => {
             deleteDocument(current_document);
             render();
             break;
+
+
+        case "create-save-point":
+            PromptSavePoint();
+            break;
     }
 })
 
@@ -705,6 +712,25 @@ saveTabButton.addEventListener("click", () => {
 // });
 
 //#region Document Prompt Functions
+async function PromptSavePoint(){
+    try {
+    const handle = await window.showSaveFilePicker({types: [
+            {
+                description: "JSON file",
+                accept: {
+                    "application/json": [".json"]
+                }
+            }
+        ]});
+    
+    document_save_point.set(current_document, handle);
+    
+    } catch (error) {
+        // User cancelled
+    }
+}
+
+
 function createDocumentPrompt(){
     const NewDocName = prompt("Enter a name for the new document:");
 
