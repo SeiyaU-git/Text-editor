@@ -712,6 +712,7 @@ saveTabButton.addEventListener("click", () => {
 // });
 
 //#region Document Prompt Functions
+// Opens the browser file picker and remembers where the current document is saved.
 async function PromptSavePoint(){
     try {
     const handle = await window.showSaveFilePicker({types: [
@@ -732,14 +733,15 @@ async function PromptSavePoint(){
 
 
 function createDocumentPrompt(){
-    const NewDocName = prompt("Enter a name for the new document:");
+    const newDocumentName = prompt("Enter a name for the new document:");
 
-    if (NewDocName) {
-        var add_text = ""
-        var add_index = 1
-        while(folder_info.documents.some(doc => doc.name === NewDocName + add_text)){
-            add_index += 1
-            add_text = ` (${add_index})`
+    if (newDocumentName) {
+        var documentNameSuffix = ""
+        var documentNameNumber = 1
+        // Add a number so that document names remain unique.
+        while(folder_info.documents.some(doc => doc.name === newDocumentName + documentNameSuffix)){
+            documentNameNumber += 1
+            documentNameSuffix = ` (${documentNameNumber})`
         }
 
         if(folder_info.documents.length > 0)
@@ -747,16 +749,14 @@ function createDocumentPrompt(){
             saveTabDocument(); 
         }
 
-        createDocument(NewDocName + add_text)
-        loadDocumentFolder(NewDocName + add_text)
-        // document_info = createDocument(NewDocName)
-
+        createDocument(newDocumentName + documentNameSuffix)
+        loadDocumentFolder(newDocumentName + documentNameSuffix)
 
         render();
     }
 };
 
-function renameDocumentPrompt(doc_name){
+function renameDocumentPrompt(documentName){
     const newName = prompt("Enter a name for the DOCUMENT");
 
     if (! newName){
@@ -767,38 +767,39 @@ function renameDocumentPrompt(doc_name){
         return;
     }
 
-    if (doc_name == current_document) current_document = newName
-    renameDocument(doc_name, newName)
+    if (documentName == current_document) current_document = newName
+    renameDocument(documentName, newName)
     
     render()
 }
 
-function deleteDocumentPrompt(doc_name,){
-    if (confirm(`Are you sure you want to delete the DOCUMENT "${doc_name}"?`)) {
-        deleteDocument(doc_name)
+function deleteDocumentPrompt(documentName){
+    if (confirm(`Are you sure you want to delete the DOCUMENT "${documentName}"?`)) {
+        deleteDocument(documentName)
         
         render()
     }
 }
 
-function downloadDocument(doc_name) {
+function downloadDocument(documentName) {
     saveTabDocument(current_tab);
-    const doc = getDocument(doc_name);
+    const documentData = getDocument(documentName);
 
-    var jason_info = JSON.stringify(doc)
+    const documentJson = JSON.stringify(documentData)
 
-    const blob = new Blob([jason_info], {
+    const blob = new Blob([documentJson], {
         type: "application/json"
     })
 
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = `${doc.name}.json`;
+    link.download = `${documentData.name}.json`;
     link.click();
     URL.revokeObjectURL(link.href)
 }
-//#endregion
+//#endregion Document Prompt Functions
 
+// Import a document previously exported as a JSON file.
 const fileInput = document.getElementById("fileInput");
 fileInput.addEventListener("change", (event) => {
 
@@ -806,15 +807,21 @@ fileInput.addEventListener("change", (event) => {
 
     if (!file) return;
 
+    if (fileExtension !== "json") {
+        alert("Invalid file type. Please select a JSON document.");
+        fileInput.value = "";
+        return;
+    }
+
     const reader = new FileReader();
 
     reader.onload = () => {
 
-        const json_info = JSON.parse(reader.result);
+        const documentData = JSON.parse(reader.result);
 
-        folder_info.documents.push(json_info);
+        folder_info.documents.push(documentData);
 
-        current_document = json_info.name;
+        current_document = documentData.name;
 
         loadDocumentFolder(current_document);
 
