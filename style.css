@@ -77,6 +77,34 @@ main{
   
 }
 
+#editor ul{
+  margin-left: 3rem;
+}
+
+.todolist{
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-left: 3rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.todolist li{
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.todolist li input[type="checkbox"]{
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.todolist li input[type="checkbox"]:checked + span{
+  text-decoration: line-through;
+  color: var(--c-secondary-text);
+}
+
 .empty_state{
   align-items: center;
   max-width: 700px;        /* page-like width, not full screen */

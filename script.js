@@ -75,7 +75,74 @@ export function highlight(){
     
 }
 
+function insertTodoItem() {
+    const list = document.createElement('ul');
+    list.classList.add('todolist');
+    
+    const checkboxItem = document.createElement('li');
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    const label = document.createElement('span');
+    
+    const selection = window.getSelection();
+    const selectedText = selection.toString();
 
+    selection.deleteFromDocument();
+
+    label.textContent = "" + selectedText;
+
+    checkboxItem.appendChild(checkbox);
+    checkboxItem.appendChild(label);
+    list.appendChild(checkboxItem);
+
+    editor.appendChild(list);
+}
+
+editor.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        const selection = window.getSelection();
+        const node = selection.anchorNode;
+
+        const element = node.nodeType === Node.TEXT_NODE
+        ? node.parentElement
+        : node;
+
+        const todoItem = element.closest(".todolist li");
+
+        if (todoItem) {
+            console.log("Cursor is inside a todo item");
+            e.preventDefault();
+
+            const oldLabel = todoItem.querySelector('span');
+
+            const checkboxItem = document.createElement('li');
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            const label = document.createElement('span');
+
+            const cursorPosition = selection.anchorOffset;
+
+            const textBefore = oldLabel.textContent.slice(0, cursorPosition);
+            const textAfter = oldLabel.textContent.slice(cursorPosition);
+            
+            oldLabel.textContent = textBefore;
+
+            label.textContent = "" + textAfter;
+
+            checkboxItem.appendChild(checkbox);
+            checkboxItem.appendChild(label);
+            todoItem.after(checkboxItem);
+
+            const range = document.createRange();
+            range.setStart(label, 0);
+            range.collapse(true);
+
+            
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+    }
+});
 
 //#region Context Menu
 const editorContextMenu = document.getElementsByClassName("editor_context_menu")[0];
@@ -168,6 +235,7 @@ document.querySelectorAll(".editor_context_btn").forEach(button => {
             case "un-line": document.execCommand("underline"); break;
             case "strike": document.execCommand("strikeThrough"); break;
             case "highlight": highlight(); break;
+            case "todolist": insertTodoItem(); break;
         }
     });
 });
