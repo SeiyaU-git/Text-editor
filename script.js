@@ -12,6 +12,7 @@ const shortcuts = {
   's': () => saveFolderLocal(),
   'f': () => highlight(),
   'z': () => undo(),
+  '7': () => insertTodoItem(),
 }
 
 
