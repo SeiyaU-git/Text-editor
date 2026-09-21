@@ -165,6 +165,26 @@ editor.addEventListener('keydown', (e) => {
 
             const oldLabel = todoItem.querySelector('.todo-text');
 
+            if (oldLabel.textContent.trim() === "") {
+                const list = todoItem.closest(".todo-list");
+
+                const paragraph = document.createElement("p");
+                paragraph.innerHTML = "<br>";
+
+                list.after(paragraph);
+
+                todoItem.remove();
+
+                const range = document.createRange();
+                range.setStart(paragraph, 0);
+                range.collapse(true);
+
+                selection.removeAllRanges();
+                selection.addRange(range);
+
+                return;
+            }
+
             const cursorPosition = selection.anchorOffset;
 
             const textBefore = oldLabel.textContent.slice(0, cursorPosition);
