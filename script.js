@@ -75,69 +75,113 @@ export function highlight(){
     
 }
 
-function insertTodoItem() {
-    const list = document.createElement('ul');
-    list.classList.add('todolist');
+editor.addEventListener('click', (e) => {
+    if (e.target.classList.contains('todo-checkbox')){
+        const list = e.target.closest('.todo-item')
+        list.classList.toggle('completed');
+        // Basic usage
+        if (!list.classList.contains("completed")){
+            return
+        }
+        const jsConfetti = new JSConfetti()
+
+        // Trigger colorful confetti
+        jsConfetti.addConfetti({
+        confettiColors: ['#ff0a54', '#474dff', '#94ff70'],
+        confettiNumber: 100
+        })
+    }
+});
+
+
+function createTodoItem() {
+    // const list = document.createElement('ul');
+    // list.classList.add('todolist');
     
-    const checkboxItem = document.createElement('li');
-    const checkbox = document.createElement('input');
-    checkbox.type = 'checkbox';
+    const checkboxItem = document.createElement('div');
+    checkboxItem.classList.add('todo-item');
+    const checkbox = document.createElement('span');
+    checkbox.classList.add('todo-checkbox');
+    checkbox.contentEditable = "false";
     const label = document.createElement('span');
+    label.classList.add('todo-text');
     
-    const selection = window.getSelection();
-    const selectedText = selection.toString();
-
-    selection.deleteFromDocument();
-
-    label.textContent = "" + selectedText;
 
     checkboxItem.appendChild(checkbox);
     checkboxItem.appendChild(label);
+    
+    return checkboxItem;
+}
+
+function insertTodoItem() {
+    const selection = window.getSelection();
+
+    if (!selection.rangeCount) return;
+
+    const range = selection.getRangeAt(0);
+
+    const selectedText = selection.toString();
+
+    range.deleteContents();
+
+    const list = document.createElement('div');
+    list.classList.add('todo-list');
+
+    const checkboxItem = createTodoItem();
+    checkboxItem.querySelector('.todo-text').textContent = selectedText;
+
     list.appendChild(checkboxItem);
 
-    editor.appendChild(list);
+    range.insertNode(list);
+
+    // Put the cursor at the end of the new todo
+    const label = checkboxItem.querySelector('.todo-text');
+
+    const newRange = document.createRange();
+    newRange.selectNodeContents(label);
+    newRange.collapse(false);
+
+    selection.removeAllRanges();
+    selection.addRange(newRange);
 }
 
 editor.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') {
+
         const selection = window.getSelection();
         const node = selection.anchorNode;
 
         const element = node.nodeType === Node.TEXT_NODE
-        ? node.parentElement
-        : node;
+            ? node.parentElement
+            : node;
 
-        const todoItem = element.closest(".todolist li");
+        const todoItem = element.closest(".todo-item");
 
         if (todoItem) {
             console.log("Cursor is inside a todo item");
+
             e.preventDefault();
 
-            const oldLabel = todoItem.querySelector('span');
-
-            const checkboxItem = document.createElement('li');
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            const label = document.createElement('span');
+            const oldLabel = todoItem.querySelector('.todo-text');
 
             const cursorPosition = selection.anchorOffset;
 
             const textBefore = oldLabel.textContent.slice(0, cursorPosition);
             const textAfter = oldLabel.textContent.slice(cursorPosition);
-            
+
             oldLabel.textContent = textBefore;
 
-            label.textContent = "" + textAfter;
+            const checkboxItem = createTodoItem();
 
-            checkboxItem.appendChild(checkbox);
-            checkboxItem.appendChild(label);
+            const label = checkboxItem.querySelector('.todo-text');
+            label.textContent = " " + textAfter;
+
             todoItem.after(checkboxItem);
 
             const range = document.createRange();
             range.setStart(label, 0);
             range.collapse(true);
 
-            
             selection.removeAllRanges();
             selection.addRange(range);
         }
@@ -246,8 +290,8 @@ document.querySelectorAll(".tab_context_btn").forEach(button => {
 
         switch(this.dataset.func){
             case "create": createTabPrompt(); break;
-            case "delete": deleteTab(selected_tab); break;
-            case "rename": renameTab(selected_tab); break;
+            case "delete": deleteTabPrompt(selected_tab); break;
+            case "rename": renameTabPrompt(selected_tab); break;
             case "save": downloadTab(selected_tab); break;
         }
 
