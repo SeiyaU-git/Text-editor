@@ -39,6 +39,8 @@ export function createSnapshot(){
     history_index += 1
     document_history[history_index] = editor.innerHTML;
     // cursor_history[history_index] = 
+    isSaved = false 
+    renderSaveStatus()
 }
 
 
@@ -46,6 +48,16 @@ export function clearSnapshot(){
     document_history = []
     // cursor_history = []
     history_index = -1  
+}
+
+
+let isSaved = false
+const saveStatus = document.querySelector(".save_status")
+function renderSaveStatus(){
+    if (isSaved) saveStatus.classList.add("saved")
+        else saveStatus.classList.remove("saved") 
+
+    console.log(isSaved)
 }
 
 
@@ -377,6 +389,8 @@ let current_tab = null;
 //#region LOCAL SCAVE FOLDER
 function saveFolderLocal(){
     localStorage.setItem("data", JSON.stringify(folder_info))
+    isSaved = true
+    renderSaveStatus()
 }
 
 function loadFolderLocal(){
@@ -742,6 +756,10 @@ document.addEventListener("click", (e) => {
 
         case "create-save-point":
             PromptSavePoint();
+            break;
+        
+        case "savelocal":
+            saveFolderLocal();
             break;
     }
 })
