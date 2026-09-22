@@ -30,7 +30,7 @@
   margin: 0;
 
   box-sizing: border-box;
-  /* outline: red 1px solid; */
+  outline: red 1px solid;
 }
 
 
@@ -153,6 +153,17 @@ main{
   max-width: 700px;        /* page-like width, not full screen */
   margin: 80px 240px;       /* centers it, gives "floating page" feel */
 }
+
+.big_container{
+  height: 128px;
+  display: flex;
+  gap: 1rem;
+}
+
+.big_container button{
+  width: 128px;
+}
+
 
 
 body {
@@ -279,6 +290,14 @@ button:hover{
 }
 
 .tab_btns{
+  display: flex;
+  flex-flow: row;
+  
+  gap: 0px;
+  width: 200px;
+}
+
+.document_btns{
   display: flex;
   flex-flow: row;
   

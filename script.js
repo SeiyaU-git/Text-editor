@@ -534,19 +534,21 @@ function render(){
 
     editor.classList.add("deactive")
 
-    
+    emptyFolderState.classList.add("deactive")
+    emptyDocState.classList.add("deactive")
     if (!folder_info.documents || folder_info.documents.length == 0){
         emptyFolderState.classList.remove("deactive")
         return
     }
-    emptyFolderState.classList.add("deactive")
+    
     renderDocumentList()
 
+    
     if (!document_info.tabs || document_info.tabs.length == 0){
         emptyDocState.classList.remove("deactive")
         return
     }
-    emptyDocState.classList.add("deactive")
+    
     renderTabList()
     
     
