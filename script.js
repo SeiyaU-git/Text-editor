@@ -706,9 +706,6 @@ let intervalId = setInterval(function() {
 
 
 
-
-const saveTabButton = document.querySelector(".save_tab_btn");
-const loadTabButton = document.querySelector(".load_tab_btn");
 document.addEventListener("click", (e) => {
     const button = e.target.closest("[data-action]");
     if (!button) return;
@@ -831,9 +828,7 @@ function deleteTabPrompt(tab){
 // ADD LOAD LOCAL STORAGE
 // RENAME VARIABLES
 
-saveTabButton.addEventListener("click", () => {
-    downloadTab(current_tab);
-});
+
 
 
 //FIX NOW BROKEn
