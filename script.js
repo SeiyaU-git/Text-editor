@@ -536,9 +536,19 @@ const emptyFolderState = document.getElementById("empty_folder_state")
 document.addEventListener('keydown', (e) => {
     if (e.key == "Escape"){
         e.preventDefault();
-        if (render_state == RENDER_EDITOR) render_state = RENDER_DOCMENU
-        else render_state = RENDER_EDITOR
-
+        switch(render_state){
+            case RENDER_EDITOR:
+                render_state = RENDER_DOCMENU;
+                break;
+            
+            case RENDER_DOCMENU:
+                render_state = RENDER_FOLDERMENU;
+                break;
+            
+            case RENDER_FOLDERMENU:
+                render_state = RENDER_DOCMENU;
+                break;
+        }
         render()
     }
 });
@@ -607,6 +617,8 @@ function renderDocumentMenu(){
         TabButton.appendChild(name);
         
         menuContainer.appendChild(TabButton);
+
+        if (tab.name === current_tab) TabButton.classList.add("current");
     }
 }
 
@@ -614,6 +626,33 @@ function renderFolderMenu(){
     emptyFolderState.classList.remove("deactive")
     editor.classList.add("deactive")
     emptyDocState.classList.add("deactive")
+
+    
+    const menuContainer = emptyFolderState.querySelector(".big_container")
+    menuContainer.innerHTML = "<button data-action='create-tab'><i class='bx bxs-file-plus'></i><span>Create New Tab</span></button>"
+
+    menuContainer.innerHTML = "<button data-action='create-document'><i class='bx bx-plus'></i><span>Create New Document</span></button><button data-action='load-document'><i class='bx bxs-file-import'></i><span>Load Document</span></button>"
+    
+
+    for (let doc of folder_info.documents) {
+        let docBtn = document.createElement("button");
+        docBtn.classList.add("document_btn");
+        docBtn.dataset.docName = doc.name;
+        docBtn.dataset.action = "document_tab_btn"
+
+        const icon = document.createElement("i");
+        icon.classList.add("bx", "bxs-file-doc");
+
+        const name = document.createElement("span");
+        name.textContent = doc.name;
+
+        docBtn.appendChild(icon);
+        docBtn.appendChild(name);
+        
+        menuContainer.appendChild(docBtn);
+
+        if (doc.name === current_document) docBtn.classList.add("current");
+    }
 }
 
 function renderEditor(){
