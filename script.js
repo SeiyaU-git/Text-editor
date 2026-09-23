@@ -15,6 +15,10 @@ const shortcuts = {
   '7': () => insertTodoItem(),
 }
 
+//   'escape': () => {
+//     const selection = window.getSelection();
+//     selection.removeAllRanges();
+//   }
 
 //#region UNDO AND REDO
 let document_history = []
@@ -69,6 +73,7 @@ editor.addEventListener('keydown', (e) => {
     }
 
     if (e.key == "Enter" || e.key === " " || e.key == "Return" || e.key === "Delete" || e.key === "Backspace") createSnapshot();
+
 })
 //#endregion
 
@@ -526,12 +531,92 @@ const TabList = document.getElementsByClassName("tab_list")[0];
 
 const emptyDocState = document.getElementById("empty_document_state")
 const emptyFolderState = document.getElementById("empty_folder_state")
-function render(){
 
-    //FOR NOW
+
+document.addEventListener('keydown', (e) => {
+    if (e.key == "Escape"){
+        e.preventDefault();
+        if (render_state == RENDER_EDITOR) render_state = RENDER_DOCMENU
+        else render_state = RENDER_EDITOR
+
+        render()
+    }
+});
+
+const RENDER_EDITOR = 0
+const RENDER_DOCMENU = 1
+const RENDER_FOLDERMENU = 2
+
+let render_state = RENDER_FOLDERMENU
+
+function render(){
+    switch (render_state) {
+        case RENDER_EDITOR:
+            renderEditor();
+            break;
+        case RENDER_DOCMENU:
+            renderDocumentMenu();
+            break;
+        case RENDER_FOLDERMENU:
+            renderFolderMenu();
+            break;
+    }
+
+
+    // tab rendering
     TabList.innerHTML = '<button data-action="create-tab"><i class="bx bxs-file-plus"></i><span>New</span></button>'
     documentList.innerHTML = '<button data-action="create-document"><i class="bx bxs-file-plus"></i><span>New</span></button>'
 
+    //FOR NOW
+    if (!folder_info.documents || folder_info.documents.length == 0){
+        return
+    }
+
+    renderDocumentList()
+
+    if (!document_info.tabs || document_info.tabs.length == 0){
+        return
+    }
+    
+    renderTabList()
+}
+
+function renderDocumentMenu(){
+    emptyDocState.classList.remove("deactive")
+    editor.classList.add("deactive")
+    emptyFolderState.classList.add("deactive")
+
+
+    const menuContainer = emptyDocState.querySelector(".big_container")
+    menuContainer.innerHTML = "<button data-action='create-tab'><i class='bx bxs-file-plus'></i><span>Create New Tab</span></button>"
+
+    for (const tab of document_info.tabs) {
+        const TabButton = document.createElement("button");
+        TabButton.classList.add("document_tab_btn");
+        TabButton.dataset.tabName = tab.name;
+        TabButton.dataset.action = "tab_btn"
+
+        const icon = document.createElement("i");
+        icon.classList.add("bx", "bxs-file-doc");
+
+        const name = document.createElement("span");
+        name.textContent = tab.name;
+        
+
+        TabButton.appendChild(icon);
+        TabButton.appendChild(name);
+        
+        menuContainer.appendChild(TabButton);
+    }
+}
+
+function renderFolderMenu(){
+    emptyFolderState.classList.remove("deactive")
+    editor.classList.add("deactive")
+    emptyDocState.classList.add("deactive")
+}
+
+function renderEditor(){
     editor.classList.add("deactive")
 
     emptyFolderState.classList.add("deactive")
@@ -541,15 +626,10 @@ function render(){
         return
     }
     
-    renderDocumentList()
-
-    
     if (!document_info.tabs || document_info.tabs.length == 0){
         emptyDocState.classList.remove("deactive")
         return
     }
-    
-    renderTabList()
     
     
     editor.classList.remove("deactive")
@@ -576,12 +656,14 @@ function renderTabList(){
         const TabButton = document.createElement("button");
         TabButton.classList.add("document_tab_btn");
         TabButton.dataset.tabName = tab.name;
-        
+        TabButton.dataset.action = "tab_btn"
+
         const icon = document.createElement("i");
         icon.classList.add("bx", "bxs-file-doc");
 
         const name = document.createElement("span");
         name.textContent = tab.name;
+        
 
         TabButton.appendChild(icon);
         TabButton.appendChild(name);
@@ -590,15 +672,6 @@ function renderTabList(){
         
         // ADD THE ACTIVE CLASS
         if (tab.name === current_tab) TabButton.classList.add("current");
-
-        TabButton.addEventListener('click', function() {
-            saveTabDocument();
-            current_tab = this.dataset.tabName;
-            render()
-
-            clearSnapshot();
-            createSnapshot();
-        });
     }
 
 
@@ -613,7 +686,8 @@ function renderDocumentList(){
         let docBtn = document.createElement("button");
         docBtn.classList.add("document_btn");
         docBtn.dataset.docName = doc.name;
-        
+        docBtn.dataset.action = "document_tab_btn"
+
         const icon = document.createElement("i");
         icon.classList.add("bx", "bxs-file-doc");
 
@@ -627,15 +701,6 @@ function renderDocumentList(){
 
         if (doc.name === current_document) docBtn.classList.add("current");
 
-
-        //FIIIIX NOWWWWW FIX NOWW
-        docBtn.addEventListener('click', function() {
-            saveTabDocument()
-            current_document = this.dataset.docName
-            loadDocumentFolder(current_document);
-            
-            render();
-        });
     }
 
     // documentList.innerHTML += '<button data-action="create-document"><i class="bx bxs-file-plus"></i><span>New</span></button>'
@@ -706,6 +771,7 @@ let intervalId = setInterval(function() {
 
 
 
+//#region DATA ACTION
 document.addEventListener("click", (e) => {
     const button = e.target.closest("[data-action]");
     if (!button) return;
@@ -760,8 +826,31 @@ document.addEventListener("click", (e) => {
         case "savelocal":
             saveFolderLocal();
             break;
+
+        case "tab_btn":
+            saveTabDocument();
+            current_tab = button.dataset.tabName;
+            render_state = RENDER_EDITOR;
+            render()
+
+            clearSnapshot();
+            createSnapshot();
+            break;
+        
+        
+        case "document_tab_btn":
+            //FIIIIX NOWWWWW FIX NOWW
+            saveTabDocument()
+            current_document = button.dataset.docName
+            loadDocumentFolder(current_document);
+            
+            render_state = RENDER_DOCMENU;
+            render();
+            break;
+        
     }
 })
+//#endregion
 
 //#region tab Prompt functions
 function createTabPrompt(){
@@ -785,6 +874,7 @@ function createTabPrompt(){
         })
         current_tab = newTabName + add_text;
 
+        render_state = RENDER_EDITOR
         render()
     }
 };
@@ -900,6 +990,7 @@ function createDocumentPrompt(){
         createDocument(newDocumentName + documentNameSuffix)
         loadDocumentFolder(newDocumentName + documentNameSuffix)
 
+        render_state = RENDER_DOCMENU;
         render();
     }
 };
