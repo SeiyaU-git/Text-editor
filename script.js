@@ -393,6 +393,8 @@ let current_tab = null;
 
 //#region LOCAL SCAVE FOLDER
 function saveFolderLocal(){
+    saveTabDocument();
+
     localStorage.setItem("data", JSON.stringify(folder_info))
     isSaved = true
     renderSaveStatus()
@@ -538,6 +540,7 @@ document.addEventListener('keydown', (e) => {
         e.preventDefault();
         switch(render_state){
             case RENDER_EDITOR:
+                saveTabDocument();
                 render_state = RENDER_DOCMENU;
                 break;
             
@@ -597,8 +600,8 @@ function renderDocumentMenu(){
     emptyFolderState.classList.add("deactive")
 
 
-    const menuContainer = emptyDocState.querySelector(".big_container")
-    menuContainer.innerHTML = "<button data-action='create-tab'><i class='bx bxs-file-plus'></i><span>Create New Tab</span></button>"
+    const menuContainer = emptyDocState.querySelectorAll(".big_container")[1]
+    menuContainer.innerHTML = ""//"<button data-action='create-tab'><i class='bx bxs-file-plus'></i><span>Create New Tab</span></button>"
 
     for (const tab of document_info.tabs) {
         const TabButton = document.createElement("button");
@@ -628,10 +631,10 @@ function renderFolderMenu(){
     emptyDocState.classList.add("deactive")
 
     
-    const menuContainer = emptyFolderState.querySelector(".big_container")
-    menuContainer.innerHTML = "<button data-action='create-tab'><i class='bx bxs-file-plus'></i><span>Create New Tab</span></button>"
+    const menuContainer = emptyFolderState.querySelectorAll(".big_container")[1]
+    // menuContainer.innerHTML = "<button data-action='create-tab'><i class='bx bxs-file-plus'></i><span>Create New Tab</span></button>"
 
-    menuContainer.innerHTML = "<button data-action='create-document'><i class='bx bx-plus'></i><span>Create New Document</span></button><button data-action='load-document'><i class='bx bxs-file-import'></i><span>Load Document</span></button>"
+    menuContainer.innerHTML = ""//"<button data-action='create-document'><i class='bx bx-plus'></i><span>Create New Document</span></button><button data-action='load-document'><i class='bx bxs-file-import'></i><span>Load Document</span></button>"
     
 
     for (let doc of folder_info.documents) {
@@ -677,7 +680,7 @@ function renderEditor(){
 
 function renderTab(document_name, tab_name){
     
-    editor.innerHTML = ""
+    // editor.innerHTML = ""
     let doc = getDocument(document_name)
     const tab = getTab(document_name, tab_name)
     if(!tab) return
