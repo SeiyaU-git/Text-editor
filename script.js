@@ -793,6 +793,8 @@ window.onload = function exampleFunction(){
     // localStorage.clear()
     loadFolderLocal();
 
+    console.log("LOADED FROM LOCAL STORAGE:", folder_info);
+
     if (folder_info.documents.length > 0) {
         loadDocumentFolder(folder_info.documents[0].name);
     }
@@ -870,7 +872,8 @@ document.addEventListener("click", (e) => {
             break;
 
         case "tab_btn":
-            saveTabDocument();
+            if(render_state == RENDER_EDITOR) saveTabDocument()
+                
             current_tab = button.dataset.tabName;
             render_state = RENDER_EDITOR;
             render()
@@ -882,7 +885,8 @@ document.addEventListener("click", (e) => {
         
         case "document_tab_btn":
             //FIIIIX NOWWWWW FIX NOWW
-            saveTabDocument()
+            if(render_state == RENDER_EDITOR) saveTabDocument()
+
             current_document = button.dataset.docName
             loadDocumentFolder(current_document);
             
