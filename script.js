@@ -393,7 +393,7 @@ let current_tab = null;
 
 //#region LOCAL SCAVE FOLDER
 function saveFolderLocal(){
-    saveTabDocument();
+    if(render_state = RENDER_EDITOR) saveTabDocument();
 
     localStorage.setItem("data", JSON.stringify(folder_info))
     isSaved = true
@@ -468,8 +468,14 @@ function loadDocumentFolder(document_name) {
 //#region TAB FUNCTIONS
 function getTab(document_name, tab_name){
     let doc = getDocument(document_name);
+
+        if (!doc) {
+        return null;
+    }
+
     const tab = doc.tabs.find(t => t.name == tab_name);
-    return tab;
+
+    return tab || null;
 }
 
 function createTab(document_name, name){
@@ -509,19 +515,21 @@ function deleteTabDocument(document_name, name){
     doc.tabs.splice(index, 1)
 }
 
-function saveTabDocument(tab_name = current_tab){
+function saveTabDocument(tab_name = current_tab, doc_name = current_document){
+    if (!doc_name || !tab_name) return;
+    
     if (document_info.tabs.length <= 0) {
         return
     }
     
-    const tab = getTab(current_document, tab_name)
+    const tab = getTab(doc_name, tab_name)
 
     if (!tab) {
         return
     }
 
 
-    tab.innerHTML = editor.innerHTML
+    tab.innerHTML = editor.innerHTML;
 }
 
 
@@ -822,6 +830,9 @@ document.addEventListener("click", (e) => {
 
     const action = button.dataset.action;
 
+    let oldDocument = ""
+    let oldTab = ""
+
     switch (action) {
         case "create-tab":
             createTabPrompt();
@@ -872,7 +883,10 @@ document.addEventListener("click", (e) => {
             break;
 
         case "tab_btn":
-            if(render_state == RENDER_EDITOR) saveTabDocument()
+            oldDocument = current_document;
+            oldTab = current_tab;    
+
+            if(render_state == RENDER_EDITOR) saveTabDocument(oldDocument, oldTab)
                 
             current_tab = button.dataset.tabName;
             render_state = RENDER_EDITOR;
@@ -884,9 +898,12 @@ document.addEventListener("click", (e) => {
         
         
         case "document_tab_btn":
-            //FIIIIX NOWWWWW FIX NOWW
-            if(render_state == RENDER_EDITOR) saveTabDocument()
+            oldDocument = current_document;
+            oldTab = current_tab;
 
+            //FIIIIX NOWWWWW FIX NOWW
+            if(render_state == RENDER_EDITOR) saveTabDocument(oldDocument, oldTab)
+            
             current_document = button.dataset.docName
             loadDocumentFolder(current_document);
             
@@ -1028,7 +1045,7 @@ function createDocumentPrompt(){
             documentNameSuffix = ` (${documentNameNumber})`
         }
 
-        if(folder_info.documents.length > 0)
+        if(folder_info.documents.length > 0 && render_state == RENDER_EDITOR)
         {
             saveTabDocument(); 
         }
