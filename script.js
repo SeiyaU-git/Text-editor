@@ -1,5 +1,5 @@
 const editor = document.getElementById("editor")
-
+const mini_editor = document.getElementsByClassName("mini_editor")[0]
 
 
 //#region EDITOR
@@ -518,7 +518,8 @@ function deleteTabDocument(document_name, name){
 function saveTabDocument(tab_name = current_tab, doc_name = current_document){
     if (!doc_name || !tab_name) return;
     
-    if (document_info.tabs.length <= 0) {
+    const doc = getDocument(doc_name);
+    if (!doc || doc.tabs.length <= 0) {
         return
     }
     
@@ -556,9 +557,9 @@ document.addEventListener('keydown', (e) => {
                 render_state = RENDER_FOLDERMENU;
                 break;
             
-            case RENDER_FOLDERMENU:
-                render_state = RENDER_DOCMENU;
-                break;
+            // case RENDER_FOLDERMENU:
+            //     render_state = RENDER_DOCMENU;
+            //     break;
         }
         render()
     }
@@ -693,6 +694,7 @@ function renderTab(document_name, tab_name){
     const tab = getTab(document_name, tab_name)
     if(!tab) return
     editor.innerHTML = tab.innerHTML
+    mini_editor.innerHTML = tab.innerHTML
 }
 
 
@@ -756,6 +758,17 @@ function renderDocumentList(){
     // documentList.innerHTML += '<button data-action="create-document"><i class="bx bxs-file-plus"></i><span>New</span></button>'
 }
 
+//#endregion
+
+
+
+//#region scrolling
+
+
+window.addEventListener("scroll", () => {
+    const scrollAmount = window.scrollY;
+    mini_editor.style.top = `${scrollAmount / -5}px`;
+});
 //#endregion
 
 const tabElement = document.createElement("button");
@@ -886,7 +899,7 @@ document.addEventListener("click", (e) => {
             oldDocument = current_document;
             oldTab = current_tab;    
 
-            if(render_state == RENDER_EDITOR) saveTabDocument(oldDocument, oldTab)
+            if(render_state == RENDER_EDITOR) saveTabDocument(oldTab, oldDocument)
                 
             current_tab = button.dataset.tabName;
             render_state = RENDER_EDITOR;
@@ -902,7 +915,7 @@ document.addEventListener("click", (e) => {
             oldTab = current_tab;
 
             //FIIIIX NOWWWWW FIX NOWW
-            if(render_state == RENDER_EDITOR) saveTabDocument(oldDocument, oldTab)
+            if(render_state == RENDER_EDITOR) saveTabDocument(oldTab, oldDocument)
             
             current_document = button.dataset.docName
             loadDocumentFolder(current_document);

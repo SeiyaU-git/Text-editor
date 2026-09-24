@@ -54,7 +54,7 @@ main{
 #editor {
 
   /* display: block; */
-
+  
   max-width: 700px;        /* page-like width, not full screen */
   margin: 40px auto;       /* centers it, gives "floating page" feel */
   padding: 40px 80px;      /* generous inner margins, like a real doc */
@@ -74,8 +74,9 @@ main{
   overflow-wrap: break-word;
   overflow-x: hidden;
   word-break: break-all; 
-
   
+  transform: scale(1);
+  transform-origin: top left;
 }
 
 #editor ul{
@@ -147,6 +148,42 @@ main{
     opacity: 0.55;
     background-color: yellow;
 }
+
+.mini_editor {
+
+  /* display: block; */
+  width: 700px;
+  position: fixed;
+  right: 0px;
+  
+
+  padding: 20px 40px;      /* generous inner margins, like a real doc */
+  background: var(--document-color);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.15); /* subtle "paper" shadow */
+  font-family: "Space Grotesk", sans-serif;
+  font-size: 24px; /* was 16 */
+  line-height: 1.6;
+  outline: none;           /* removes ugly focus border on contenteditable */
+
+  color: var(--c-text);
+
+
+  overflow: hidden;
+  white-space: wrap;
+  overflow-wrap: break-word;
+  overflow-x: hidden;
+  word-break: break-all; 
+  
+  transform: scale(0.2);
+  transform-origin: top right;
+}
+
+.unselectable {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+}
+
 
 .empty_state{
   /* align-items: center; */
