@@ -45,6 +45,8 @@ export function createSnapshot(){
     // cursor_history[history_index] = 
     isSaved = false 
     renderSaveStatus()
+
+    renderMiniEditor()
 }
 
 
@@ -694,7 +696,15 @@ function renderTab(document_name, tab_name){
     const tab = getTab(document_name, tab_name)
     if(!tab) return
     editor.innerHTML = tab.innerHTML
-    mini_editor.innerHTML = tab.innerHTML
+}
+
+function renderMiniEditor(){
+    mini_editor.classList.add("deactive")
+    if (!folder_info.documents || folder_info.documents.length == 0){
+        return
+    }
+    mini_editor.classList.remove("deactive")
+    mini_editor.innerHTML = editor.innerHTML
 }
 
 
@@ -767,8 +777,68 @@ function renderDocumentList(){
 
 window.addEventListener("scroll", () => {
     const scrollAmount = window.scrollY;
-    mini_editor.style.top = `${scrollAmount / -5}px`;
+    mini_editor.style.top = `${scrollAmount / -5 + 60}px`;
 });
+
+let dragging = false;
+let targetScroll = window.scrollY;
+
+function getScrollFromMouse(e) {
+    const rect = mini_editor.getBoundingClientRect();
+
+    const y = e.clientY - rect.top;
+    const percentage = Math.max(0, Math.min(1, y / rect.height));
+
+    const maxScroll =
+        document.documentElement.scrollHeight - window.innerHeight;
+
+    return percentage * maxScroll;
+}
+
+
+// CLICK / START DRAG
+mini_editor.addEventListener("mousedown", (e) => {
+    dragging = true;
+
+    // Immediately jump to where they clicked
+    targetScroll = getScrollFromMouse(e);
+    window.scrollTo(0, targetScroll);
+});
+
+
+// DRAG
+mini_editor.addEventListener("mousemove", (e) => {
+    if (!dragging) return;
+
+    // Set the destination
+    targetScroll = getScrollFromMouse(e);
+});
+
+
+// STOP DRAG
+window.addEventListener("mouseup", () => {
+    dragging = false;
+});
+
+
+// SMOOTH DRAGGING
+function smoothScroll() {
+    if (dragging) {
+        const current = window.scrollY;
+
+        const difference = targetScroll - current;
+
+        window.scrollTo(
+            0,
+            current + difference * 0.2
+        );
+    }
+
+    requestAnimationFrame(smoothScroll);
+}
+
+smoothScroll();
+
 //#endregion
 
 const tabElement = document.createElement("button");
