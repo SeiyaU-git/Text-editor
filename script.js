@@ -1,5 +1,5 @@
 const editor = document.getElementById("editor")
-const mini_editor = document.getElementsByClassName("mini_editor")[0]
+const miniEditor = document.querySelector(".mini_editor")
 
 
 //#region EDITOR
@@ -21,15 +21,15 @@ const shortcuts = {
 //   }
 
 //#region UNDO AND REDO
-let document_history = []
-let history_index = -1  
+let documentHistory = []
+let historyIndex = -1  
 
 // let cursor_history = []
 
 function undo(){
-    history_index -= 1
-    if (history_index < 0) return
-    editor.innerHTML = document_history[history_index]
+    historyIndex -= 1
+    if (historyIndex < 0) return
+    editor.innerHTML = documentHistory[historyIndex]
 
     console.log('undo')
 }
@@ -40,8 +40,8 @@ function redo(){
 
 // Snapshop functions
 export function createSnapshot(){
-    history_index += 1
-    document_history[history_index] = editor.innerHTML;
+    historyIndex += 1
+    documentHistory[historyIndex] = editor.innerHTML;
     // cursor_history[history_index] = 
     isSaved = false 
     renderSaveStatus()
@@ -51,9 +51,9 @@ export function createSnapshot(){
 
 
 export function clearSnapshot(){
-    document_history = []
+    documentHistory = []
     // cursor_history = []
-    history_index = -1  
+    historyIndex = -1  
 }
 
 
@@ -233,8 +233,8 @@ const editorContextMenu = document.getElementsByClassName("editor_context_menu")
 const tabContextMenu = document.getElementsByClassName("tab_context_menu")[0]
 const docContextMenu = document.getElementsByClassName("document_context_menu")[0]
 
-var selected_tab = ""
-var selected_document = ""
+let selectedTab = ""
+let selectedDocument = ""
 
 document.addEventListener("contextmenu", (e) => {
     tabContextMenu.classList.remove("active");
@@ -273,7 +273,7 @@ document.addEventListener("contextmenu", (e) => {
         tabContextMenu.style.top = `${e.clientY}px`;
         tabContextMenu.classList.add("active");
 
-        selected_tab = tabButton.dataset.tabName;
+        selectedTab = tabButton.dataset.tabName;
         tabButton.classList.add("selected");
     }
 
@@ -286,7 +286,7 @@ document.addEventListener("contextmenu", (e) => {
         docContextMenu.style.top = `${e.clientY}px`;
         docContextMenu.classList.add("active");
 
-        selected_document = docButton.dataset.docName;
+        selectedDocument = docButton.dataset.docName;
         docButton.classList.add("selected");
     }
 });
@@ -330,9 +330,9 @@ document.querySelectorAll(".tab_context_btn").forEach(button => {
 
         switch(this.dataset.func){
             case "create": createTabPrompt(); break;
-            case "delete": deleteTabPrompt(selected_tab); break;
-            case "rename": renameTabPrompt(selected_tab); break;
-            case "save": downloadTab(selected_tab); break;
+            case "delete": deleteTabPrompt(selectedTab); break;
+            case "rename": renameTabPrompt(selectedTab); break;
+            case "save": downloadTab(selectedTab); break;
         }
 
         const tabButtons = document.getElementsByClassName("document_tab_btn");
@@ -348,8 +348,8 @@ document.querySelectorAll(".document_context_btn").forEach(button => {
 
         switch(this.dataset.func){ 
             case "create": createDocumentPrompt(); break;
-            case "delete": deleteDocumentPrompt(selected_document); break;
-            case "rename": renameDocumentPrompt(selected_document); break;
+            case "delete": deleteDocumentPrompt(selectedDocument); break;
+            case "rename": renameDocumentPrompt(selectedDocument); break;
         }
 
         const docButtons = document.getElementsByClassName("document_btn");
@@ -364,17 +364,17 @@ document.querySelectorAll(".document_context_btn").forEach(button => {
 //#endregion
 
 
-let document_save_point = new Map();
+let documentSavePoint = new Map();
 
 
-let folder_info = {
+let folderInfo = {
     documents: []
 }
 
-let document_info = null;
-let current_document = null;
+let documentInfo = null;
+let currentDocument = null;
 
-let current_tab = null;
+let currentTab = null;
 
 // 📦 folder (Object)
 // │    
@@ -395,9 +395,9 @@ let current_tab = null;
 
 //#region LOCAL SCAVE FOLDER
 function saveFolderLocal(){
-    if(render_state = RENDER_EDITOR) saveTabDocument();
+    if(renderState === VIEW.EDITOR) saveTabDocument();
 
-    localStorage.setItem("data", JSON.stringify(folder_info))
+    localStorage.setItem("data", JSON.stringify(folderInfo))
     isSaved = true
     renderSaveStatus()
 }
@@ -406,62 +406,61 @@ function loadFolderLocal(){
     const savedData = localStorage.getItem("data");
 
     if (savedData) {
-        folder_info = JSON.parse(savedData);
+        folderInfo = JSON.parse(savedData);
     }
 }
 //#endregion
 
 //#region DOCUMENT FUNCTIONS
 function getDocument(document_name){
-    let doc = folder_info.documents.find(doc => doc.name == document_name) 
+    const doc = folderInfo.documents.find(doc => doc.name === document_name);
     return doc;
 }
 
 function createDocument(name){
-    var doc_info = {
+    const doc_info = {
         name: name,
         saved: true,
         tabs: [],
-    }
+    };
 
-    folder_info.documents.push(doc_info)
+    folderInfo.documents.push(doc_info);
     // saveDocumentFolder(doc_info.name, doc_info)
     //FIIXf
-    
 }
 
 function deleteDocument(name){
     const doc = getDocument(name);
 
-    const index = folder_info.documents.findIndex(
+    const index = folderInfo.documents.findIndex(
         item => item === doc
     );
 
     if (index === -1) return;
 
-    folder_info.documents.splice(index, 1);
+    folderInfo.documents.splice(index, 1);
 
-    if (folder_info.documents.length > 0) {
-        loadDocumentFolder(folder_info.documents[0].name);
+    if (folderInfo.documents.length > 0) {
+        loadDocumentFolder(folderInfo.documents[0].name);
     } else {
-        document_info = null;
-        current_document = null;
-        current_tab = null;
+        documentInfo = null;
+        currentDocument = null;
+        currentTab = null;
     }
 }
 
 function renameDocument(name, new_name){
-    let doc = getDocument(name);
-    doc.name = new_name
+    const doc = getDocument(name);
+    doc.name = new_name;
 }
 
 function loadDocumentFolder(document_name) {
     let doc = getDocument(document_name);
-    document_info = doc;
-    current_document = document_info.name
+    documentInfo = doc;
+    currentDocument = documentInfo.name
     
-    if (document_info.tabs.length > 0) {
-        current_tab = document_info.tabs[0].name;
+    if (documentInfo.tabs.length > 0) {
+        currentTab = documentInfo.tabs[0].name;
     }
 }
 
@@ -469,13 +468,13 @@ function loadDocumentFolder(document_name) {
 
 //#region TAB FUNCTIONS
 function getTab(document_name, tab_name){
-    let doc = getDocument(document_name);
+    const doc = getDocument(document_name);
 
-        if (!doc) {
+    if (!doc) {
         return null;
     }
 
-    const tab = doc.tabs.find(t => t.name == tab_name);
+    const tab = doc.tabs.find(t => t.name === tab_name);
 
     return tab || null;
 }
@@ -497,7 +496,7 @@ function createTab(document_name, name){
 }
 
 function getTabIndex(tab_name){
-    return document_info.tabs.findIndex(tab => tab.name === tab_name);
+    return documentInfo.tabs.findIndex(tab => tab.name === tab_name);
 }
 
 function renameTabDocument(document_name, name, new_name){
@@ -517,7 +516,7 @@ function deleteTabDocument(document_name, name){
     doc.tabs.splice(index, 1)
 }
 
-function saveTabDocument(tab_name = current_tab, doc_name = current_document){
+function saveTabDocument(tab_name = currentTab, doc_name = currentDocument){
     if (!doc_name || !tab_name) return;
     
     const doc = getDocument(doc_name);
@@ -531,6 +530,11 @@ function saveTabDocument(tab_name = current_tab, doc_name = current_document){
         return
     }
 
+    // Don't accidentally erase a tab
+    if (editor.innerHTML === "" && tab.innerHTML !== "") {
+        console.warn("Blocked accidental empty tab save");
+        return;
+    }
 
     tab.innerHTML = editor.innerHTML;
 }
@@ -540,7 +544,7 @@ function saveTabDocument(tab_name = current_tab, doc_name = current_document){
 
 //#region RENDER
 
-const TabList = document.getElementsByClassName("tab_list")[0];
+const TabList = document.querySelector(".tab_list");
 
 const emptyDocState = document.getElementById("empty_document_state")
 const emptyFolderState = document.getElementById("empty_folder_state")
@@ -549,14 +553,14 @@ const emptyFolderState = document.getElementById("empty_folder_state")
 document.addEventListener('keydown', (e) => {
     if (e.key == "Escape"){
         e.preventDefault();
-        switch(render_state){
-            case RENDER_EDITOR:
+        switch(renderState){
+            case VIEW.EDITOR:
                 saveTabDocument();
-                render_state = RENDER_DOCMENU;
+                renderState = VIEW.DOCUMENTS;
                 break;
             
-            case RENDER_DOCMENU:
-                render_state = RENDER_FOLDERMENU;
+            case VIEW.DOCUMENTS:
+                renderState = VIEW.FOLDER;
                 break;
             
             // case RENDER_FOLDERMENU:
@@ -567,21 +571,23 @@ document.addEventListener('keydown', (e) => {
     }
 });
 
-const RENDER_EDITOR = 0
-const RENDER_DOCMENU = 1
-const RENDER_FOLDERMENU = 2
+const VIEW = {
+    EDITOR: 0,
+    DOCUMENTS: 1,
+    FOLDER: 2
+};
 
-let render_state = RENDER_FOLDERMENU
+let renderState = VIEW.FOLDER
 
 function render(){
-    switch (render_state) {
-        case RENDER_EDITOR:
+    switch (renderState) {
+        case VIEW.EDITOR:
             renderEditor();
             break;
-        case RENDER_DOCMENU:
+        case VIEW.DOCUMENTS:
             renderDocumentMenu();
             break;
-        case RENDER_FOLDERMENU:
+        case VIEW.FOLDER:
             renderFolderMenu();
             break;
     }
@@ -592,13 +598,13 @@ function render(){
     documentList.innerHTML = '<button data-action="create-document"><i class="bx bxs-file-plus"></i><span>New</span></button>'
 
     //FOR NOW
-    if (!folder_info.documents || folder_info.documents.length == 0){
+    if (!folderInfo.documents || folderInfo.documents.length == 0){
         return
     }
 
     renderDocumentList()
 
-    if (!document_info.tabs || document_info.tabs.length == 0){
+    if (!documentInfo.tabs || documentInfo.tabs.length == 0){
         return
     }
     
@@ -614,7 +620,7 @@ function renderDocumentMenu(){
     const menuContainer = emptyDocState.querySelectorAll(".big_container")[1]
     menuContainer.innerHTML = ""//"<button data-action='create-tab'><i class='bx bxs-file-plus'></i><span>Create New Tab</span></button>"
 
-    for (const tab of document_info.tabs) {
+    for (const tab of documentInfo.tabs) {
         const TabButton = document.createElement("button");
         TabButton.classList.add("document_tab_btn");
         TabButton.dataset.tabName = tab.name;
@@ -632,7 +638,7 @@ function renderDocumentMenu(){
         
         menuContainer.appendChild(TabButton);
 
-        if (tab.name === current_tab) TabButton.classList.add("current");
+        if (tab.name === currentTab) TabButton.classList.add("current");
     }
 }
 
@@ -648,7 +654,7 @@ function renderFolderMenu(){
     menuContainer.innerHTML = ""//"<button data-action='create-document'><i class='bx bx-plus'></i><span>Create New Document</span></button><button data-action='load-document'><i class='bx bxs-file-import'></i><span>Load Document</span></button>"
     
 
-    for (let doc of folder_info.documents) {
+    for (let doc of folderInfo.documents) {
         let docBtn = document.createElement("button");
         docBtn.classList.add("document_btn");
         docBtn.dataset.docName = doc.name;
@@ -665,7 +671,7 @@ function renderFolderMenu(){
         
         menuContainer.appendChild(docBtn);
 
-        if (doc.name === current_document) docBtn.classList.add("current");
+        if (doc.name === currentDocument) docBtn.classList.add("current");
     }
 }
 
@@ -674,19 +680,19 @@ function renderEditor(){
 
     emptyFolderState.classList.add("deactive")
     emptyDocState.classList.add("deactive")
-    if (!folder_info.documents || folder_info.documents.length == 0){
+    if (!folderInfo.documents || folderInfo.documents.length == 0){
         emptyFolderState.classList.remove("deactive")
         return
     }
     
-    if (!document_info.tabs || document_info.tabs.length == 0){
+    if (!documentInfo || !documentInfo.tabs || documentInfo.tabs.length == 0){
         emptyDocState.classList.remove("deactive")
         return
     }
     
     
     editor.classList.remove("deactive")
-    renderTab(current_document, current_tab)
+    renderTab(currentDocument, currentTab)
 }
 
 function renderTab(document_name, tab_name){
@@ -699,12 +705,12 @@ function renderTab(document_name, tab_name){
 }
 
 function renderMiniEditor(){
-    mini_editor.classList.add("deactive")
-    if (!folder_info.documents || folder_info.documents.length == 0){
+    miniEditor.classList.add("deactive")
+    if (!folderInfo.documents || folderInfo.documents.length == 0){
         return
     }
-    mini_editor.classList.remove("deactive")
-    mini_editor.innerHTML = editor.innerHTML
+    miniEditor.classList.remove("deactive")
+    miniEditor.innerHTML = editor.innerHTML
 }
 
 
@@ -712,7 +718,7 @@ function renderTabList(){
     TabList.innerHTML = ""
 
     
-    for (const tab of document_info.tabs) {
+    for (const tab of documentInfo.tabs) {
 
         //Create the tab button
         const TabButton = document.createElement("button");
@@ -733,18 +739,18 @@ function renderTabList(){
         TabList.appendChild(TabButton);
         
         // ADD THE ACTIVE CLASS
-        if (tab.name === current_tab) TabButton.classList.add("current");
+        if (tab.name === currentTab) TabButton.classList.add("current");
     }
 
 
     // TabList.innerHTML += '<button data-action="create-tab"><i class="bx bxs-file-plus"></i><span>New</span></button>'
 }
 
-let documentList = document.getElementsByClassName("document_list")[0];
+let documentList = document.querySelector(".document_list");
 function renderDocumentList(){
     documentList.innerHTML = ""
     
-    for (let doc of folder_info.documents) {
+    for (let doc of folderInfo.documents) {
         let docBtn = document.createElement("button");
         docBtn.classList.add("document_btn");
         docBtn.dataset.docName = doc.name;
@@ -761,7 +767,7 @@ function renderDocumentList(){
         
         documentList.appendChild(docBtn);
 
-        if (doc.name === current_document) docBtn.classList.add("current");
+        if (doc.name === currentDocument) docBtn.classList.add("current");
 
     }
 
@@ -777,14 +783,14 @@ function renderDocumentList(){
 
 window.addEventListener("scroll", () => {
     const scrollAmount = window.scrollY;
-    mini_editor.style.top = `${scrollAmount / -5 + 60}px`;
+    miniEditor.style.top = `${scrollAmount / -5 + 60}px`;
 });
 
 let dragging = false;
 let targetScroll = window.scrollY;
 
 function getScrollFromMouse(e) {
-    const rect = mini_editor.getBoundingClientRect();
+    const rect = miniEditor.getBoundingClientRect();
 
     const y = e.clientY - rect.top;
     const percentage = Math.max(0, Math.min(1, y / rect.height));
@@ -797,7 +803,7 @@ function getScrollFromMouse(e) {
 
 
 // CLICK / START DRAG
-mini_editor.addEventListener("mousedown", (e) => {
+miniEditor.addEventListener("mousedown", (e) => {
     dragging = true;
 
     // Immediately jump to where they clicked
@@ -807,7 +813,7 @@ mini_editor.addEventListener("mousedown", (e) => {
 
 
 // DRAG
-mini_editor.addEventListener("mousemove", (e) => {
+miniEditor.addEventListener("mousemove", (e) => {
     if (!dragging) return;
 
     // Set the destination
@@ -844,7 +850,7 @@ smoothScroll();
 const tabElement = document.createElement("button");
 // const createTab = document.getElementById("createTab");
 
-const sidebar = document.getElementsByClassName("sidebar")[0];
+const sidebar = document.querySelector(".sidebar");
 const sidebarCollapseBtn = document.querySelector(".sidebar_collapse")
 
 sidebarCollapseBtn.addEventListener("click", () => {
@@ -859,15 +865,18 @@ sidebarCollapseBtn.addEventListener("click", () => {
 
 
 
-function downloadTab(tab) {
-    saveTabDocument(tab);
-    const text = document_info.get(tab)
-    const blob = new Blob([text], {type : "text/plain"})
-    const link = document.createElement("a")
-    link.href = URL.createObjectURL(blob)
-    link.download = `${current_tab}.txt`
-    link.click()
-    URL.revokeObjectURL(link.href)
+function downloadTab(tabName = currentTab) {
+    if (!currentDocument || !tabName) return;
+
+    saveTabDocument(tabName, currentDocument);
+    const tab = getTab(currentDocument, tabName);
+    const text = tab ? tab.innerHTML : "";
+    const blob = new Blob([text], { type: "text/plain" });
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `${tabName}.txt`;
+    link.click();
+    URL.revokeObjectURL(link.href);
 }
 
 //#endregion
@@ -878,16 +887,16 @@ window.onbeforeunload = function(){
 }
 
 window.onload = function exampleFunction(){
-    folder_info = {
+    folderInfo = {
         documents: []
     }
     // localStorage.clear()
     loadFolderLocal();
 
-    console.log("LOADED FROM LOCAL STORAGE:", folder_info);
+    console.log("LOADED FROM LOCAL STORAGE:", folderInfo);
 
-    if (folder_info.documents.length > 0) {
-        loadDocumentFolder(folder_info.documents[0].name);
+    if (folderInfo.documents.length > 0) {
+        loadDocumentFolder(folderInfo.documents[0].name);
     }
     
 
@@ -922,11 +931,11 @@ document.addEventListener("click", (e) => {
             break;
 
         case "rename-tab":
-            renameTabPrompt(current_tab);
+            renameTabPrompt(currentTab);
             break;
         
         case "delete-tab":
-            deleteTabPrompt(current_tab);
+            deleteTabPrompt(currentTab);
             break;
         
         case "create-document":
@@ -942,7 +951,7 @@ document.addEventListener("click", (e) => {
             break;
 
         case "download-document":
-            downloadDocument(current_document);
+            downloadDocument(currentDocument);
             break;
         
         case "load-document":
@@ -950,9 +959,9 @@ document.addEventListener("click", (e) => {
             break;
         
         case "close-document":
-            saveTabDocument(current_tab);
-            downloadDocument(current_document);
-            deleteDocument(current_document);
+            saveTabDocument(currentTab, currentDocument);
+            downloadDocument(currentDocument);
+            deleteDocument(currentDocument);
             render();
             break;
 
@@ -966,13 +975,13 @@ document.addEventListener("click", (e) => {
             break;
 
         case "tab_btn":
-            oldDocument = current_document;
-            oldTab = current_tab;    
+            oldDocument = currentDocument;
+            oldTab = currentTab;    
 
-            if(render_state == RENDER_EDITOR) saveTabDocument(oldTab, oldDocument)
+            if(renderState == VIEW.EDITOR) saveTabDocument(oldTab, oldDocument)
                 
-            current_tab = button.dataset.tabName;
-            render_state = RENDER_EDITOR;
+            currentTab = button.dataset.tabName;
+            renderState = VIEW.EDITOR;
             render()
 
             clearSnapshot();
@@ -981,16 +990,16 @@ document.addEventListener("click", (e) => {
         
         
         case "document_tab_btn":
-            oldDocument = current_document;
-            oldTab = current_tab;
+            oldDocument = currentDocument;
+            oldTab = currentTab;
 
             //FIIIIX NOWWWWW FIX NOWW
-            if(render_state == RENDER_EDITOR) saveTabDocument(oldTab, oldDocument)
+            if(renderState == VIEW.EDITOR) saveTabDocument(oldTab, oldDocument)
             
-            current_document = button.dataset.docName
-            loadDocumentFolder(current_document);
+            currentDocument = button.dataset.docName
+            loadDocumentFolder(currentDocument);
             
-            render_state = RENDER_DOCMENU;
+            renderState = VIEW.DOCUMENTS;
             render();
             break;
         
@@ -1000,28 +1009,28 @@ document.addEventListener("click", (e) => {
 
 //#region tab Prompt functions
 function createTabPrompt(){
+    if (!documentInfo) return;
+
     const newTabName = prompt("Enter a name for the new document:");
 
     if (newTabName) {
-
-        
-        var add_text = ""
-        var add_index = 1
-        while (document_info.tabs.some(tab => tab.name === newTabName + add_text)) {
-            add_index += 1
-            add_text = ` (${add_index})`
+        let addText = "";
+        let addIndex = 1;
+        while (documentInfo.tabs.some(tab => tab.name === newTabName + addText)) {
+            addIndex += 1;
+            addText = ` (${addIndex})`;
         }
 
-        saveTabDocument(current_tab)
-        document_info.tabs.push({
-            name: newTabName + add_text,
+        saveTabDocument(currentTab, currentDocument);
+        documentInfo.tabs.push({
+            name: newTabName + addText,
             innerHTML: "",
             saved: true,
-        })
-        current_tab = newTabName + add_text;
+        });
+        currentTab = newTabName + addText;
 
-        render_state = RENDER_EDITOR
-        render()
+        renderState = VIEW.EDITOR;
+        render();
     }
 };
 
@@ -1031,24 +1040,24 @@ function renameTabPrompt(tab){
     if (!newName){
         return
     }
-    if(document_info.tabs.some(tab => tab.name === newName)){
+    if(documentInfo.tabs.some(tab => tab.name === newName)){
         alert("A tab with that name already exists.");
         return;
     }
 
-    if (tab == current_tab) current_tab = newName
-    renameTabDocument(current_document, tab, newName)
+    if (tab == currentTab) currentTab = newName
+    renameTabDocument(currentDocument, tab, newName)
     
     render()
 }
 
 function deleteTabPrompt(tab){
     if (confirm(`Are you sure you want to delete the tab "${tab}"?`)) {
-        deleteTabDocument(current_document, tab)
+        deleteTabDocument(currentDocument, tab)
         
-        if (tab === current_tab) {
-            current_tab = document_info.tabs.length > 0
-                ? document_info.tabs[0].name
+        if (tab === currentTab) {
+            currentTab = documentInfo.tabs.length > 0
+                ? documentInfo.tabs[0].name
                 : null;
         }
 
@@ -1097,7 +1106,7 @@ function deleteTabPrompt(tab){
 
 //#region Document Prompt Functions
 // Opens the browser file picker and remembers where the current document is saved.
-async function PromptSavePoint(){
+async function promptSavePoint(){
     try {
     const handle = await window.showSaveFilePicker({types: [
             {
@@ -1108,7 +1117,7 @@ async function PromptSavePoint(){
             }
         ]});
     
-    document_save_point.set(current_document, handle);
+    documentSavePoint.set(currentDocument, handle);
     
     } catch (error) {
         // User cancelled
@@ -1120,15 +1129,15 @@ function createDocumentPrompt(){
     const newDocumentName = prompt("Enter a name for the new document:");
 
     if (newDocumentName) {
-        var documentNameSuffix = ""
-        var documentNameNumber = 1
+        let documentNameSuffix = ""
+        let documentNameNumber = 1
         // Add a number so that document names remain unique.
-        while(folder_info.documents.some(doc => doc.name === newDocumentName + documentNameSuffix)){
+        while(folderInfo.documents.some(doc => doc.name === newDocumentName + documentNameSuffix)){
             documentNameNumber += 1
             documentNameSuffix = ` (${documentNameNumber})`
         }
 
-        if(folder_info.documents.length > 0 && render_state == RENDER_EDITOR)
+        if(folderInfo.documents.length > 0 && renderState == VIEW.EDITOR)
         {
             saveTabDocument(); 
         }
@@ -1136,7 +1145,7 @@ function createDocumentPrompt(){
         createDocument(newDocumentName + documentNameSuffix)
         loadDocumentFolder(newDocumentName + documentNameSuffix)
 
-        render_state = RENDER_DOCMENU;
+        renderState = VIEW.DOCUMENTS;
         render();
     }
 };
@@ -1147,12 +1156,12 @@ function renameDocumentPrompt(documentName){
     if (! newName){
         return
     }
-    if(folder_info.documents.some(doc => doc.name === newName)){
+    if(folderInfo.documents.some(doc => doc.name === newName)){
         alert("A document with that name already exists.");
         return;
     }
 
-    if (documentName == current_document) current_document = newName
+    if (documentName == currentDocument) currentDocument = newName
     renameDocument(documentName, newName)
     
     render()
@@ -1167,8 +1176,11 @@ function deleteDocumentPrompt(documentName){
 }
 
 function downloadDocument(documentName) {
-    saveTabDocument(current_tab);
+    if (!documentName) return;
+
+    saveTabDocument(currentTab, currentDocument);
     let documentData = getDocument(documentName);
+    if (!documentData) return;
 
     documentData.type = "txtdoc";
 
@@ -1217,11 +1229,11 @@ fileInput.addEventListener("change", (event) => {
                 return;
             }
 
-            folder_info.documents.push(documentData);
+                    folderInfo.documents.push(documentData);
 
-            current_document = documentData.name;
+            currentDocument = documentData.name;
 
-            loadDocumentFolder(current_document);
+            loadDocumentFolder(currentDocument);
 
             render();
 
@@ -1236,56 +1248,3 @@ fileInput.addEventListener("change", (event) => {
 
     reader.readAsText(file);
 });
-
-
-
-
-// const ctrl_kbd = document.getElementById("ctrl_kbd");
-
-// const kbd_elements = document.getElementsByClassName("kbd");
-
-// const normalizeKey = (key) => {
-//     const normalizedKey = key.trim().toLowerCase();
-//     const aliases = {
-//         control: "ctrl",
-//         spacebar: "space",
-//         " ": "space",
-//         esc: "escape",
-//         del: "delete",
-//         arrowup: "up",
-//         arrowdown: "down",
-//         arrowleft: "left",
-//         arrowright: "right"
-//     };
-//     return aliases[normalizedKey] || normalizedKey;
-// };
-
-// const updateKeyboardIndicator = (key, active) => {
-//     const normalizedKey = normalizeKey(key);
-
-//     if (normalizedKey === "ctrl") {
-//         ctrl_kbd?.classList.toggle("active", active);
-//     }
-
-//     for (const kbd_element of kbd_elements) {
-//         const displayedKey = normalizeKey(kbd_element.textContent);
-//         if (displayedKey === normalizedKey || displayedKey.split(/\s*\+\s*/).includes(normalizedKey)) {
-//             kbd_element.classList.toggle("active", active);
-//         }
-//     }
-// };
-
-// window.addEventListener("keyup", (e) => {
-//     updateKeyboardIndicator(e.key, false);
-// });
-
-// window.addEventListener("keydown", (e) => {
-//     updateKeyboardIndicator(e.key, true);
-// });
-
-// window.addEventListener("blur", () => {
-//     for (const kbd_element of kbd_elements) {
-//         kbd_element.classList.remove("active");
-//     }
-//     ctrl_kbd?.classList.remove("active");
-// });

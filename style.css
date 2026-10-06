@@ -240,6 +240,22 @@ kbd.active{
   color: var(--c-element)
 }
 
+.sidebar_collapse{
+  position: fixed;
+  left: 0px;
+  top: 0px;
+  height: 48px;
+  width: 48px;
+  z-index: 10;
+}
+
+.spacer{
+  height: 0px;
+  width: 100%;
+}
+
+
+
 .sidebar{
   position: fixed;
   background-color: var(--c-element);
@@ -252,15 +268,37 @@ kbd.active{
   display: flex;
   flex-flow: column;
   gap: 80px;
+
+  transition: 0.3s ease-in-out;
+}
+
+.sidebar button, 
+.sidebar nav h2{
+  transition: 0.3s ease-in-out;
 }
 
 .sidebar.collapsed{
-  width: 40px;
-  overflow: hidden;
+  width: 0px; /*40px*/
+  /* overflow: hidden; */
+}
+
+.collapsed div{
+  min-width: 0px;
+  display: none;
 }
 
 
+.collapsed button{
+  width: 0px;
 
+  align-items: center;
+  text-align: center;
+}
+
+.collapsed h2{
+  width: 0px;
+  overflow: hidden;
+}
 
 .sidebar ul{
   display: flex;
@@ -297,9 +335,6 @@ button:hover{
   display: all;
 }
 
-.collapsed .document_tab_btn span{
-  display: none;
-}
 
 
 
@@ -308,7 +343,7 @@ button:hover{
 .document_tab_btn.selected{
   background-color: var(--c-secondary-element-hover);
   color: var(--c-text-hover);
-  border: 4px solid red;
+  border: 4px solid d;
 }
 
 .document_btn.selected{

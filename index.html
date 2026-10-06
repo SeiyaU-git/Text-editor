@@ -15,9 +15,9 @@
     <!-- CDN installation -->
     <script src="https://cdn.jsdelivr.net/npm/js-confetti@latest/dist/js-confetti.browser.js"></script>
     
+    <button class = "sidebar_collapse"><i class='bx bx-sidebar'></i></button>
     <aside class = "sidebar">
-        
-        <button class = "sidebar_collapse"><i class='bx bx-sidebar'></i></button>
+        <div class = "spacer"></div>
         <nav>
             <h2>PROJECT</h2>
             <div class="document_btns">
@@ -28,12 +28,12 @@
 
                 <button data-action="delete-document">
                     <i class='bx bxs-trash'></i>
-                    <span>Delete</span>
+                    <span>Del</span>
                 </button>
 
                 <button data-action="rename-document">
                     <i class='bx bxs-rename' ></i>
-                    <span>Rename</span>
+                    <span>Rena</span>
                 </button>
 
                 <button data-action="download-document">
@@ -45,11 +45,13 @@
                     <i class='bx bxs-file-import'></i>
                     <span>Load</span>
                 </button>
+
+                <button data-action="close-document">
+                    <i class='bx bxs-save' ></i>
+                    <span>Save & Close</span>
+                </button>
             </div>
-            <button data-action="close-document">
-                <i class='bx bxs-save' ></i>
-                <span>Save & Close</span>
-            </button>
+
 
             <!-- <button data-action="create-save-point">
                 <i class='bx bxs-file-archive'></i>
