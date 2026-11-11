@@ -1065,7 +1065,7 @@ function createTabPrompt(){
 function renameTabPrompt(tab){
     const newName = prompt("Enter a name for the tab")
 
-    if (!newName){
+    if (!checkNameValidation(newName)){
         return
     }
     if(documentInfo.tabs.some(tab => tab.name === newName)){
@@ -1094,26 +1094,18 @@ function deleteTabPrompt(tab){
 }
 //#endregion
 
-// fileInput.addEventListener("change", (event) => {
-//     const file = event.target.files[0];
-//     if (!file) return;
 
-//     const reader = new FileReader();
-//     reader.onload = () => {
-//         const file_name = file.name.replace(/\.[^/.]+$/, "");
-//         document_info.tabs.push({
-//             name: file_name,
-//             innerHTML: reader.result,
-//             saved: true,
-//         });
-//         current_tab = file_name;
-//         render()
-//     }
-//     reader.readAsText(file);
-
-//     clearSnapshot();
-//     createSnapshot();
-// });
+function checkNameValidation(name) {
+    if (!name || name.trim() === "") {
+        alert("Name cannot be empty.");
+        return false;
+    }
+    
+    if (!name){
+        return false;
+    }
+    return true;
+}
 
 //#region Document Prompt Functions
 // Opens the browser file picker and remembers where the current document is saved.
@@ -1138,6 +1130,10 @@ async function promptSavePoint(){
 
 function createDocumentPrompt(){
     const newDocumentName = prompt("Enter a name for the new document:");
+
+    if (!checkNameValidation(newDocumentName)){
+        return
+    }
 
     if (newDocumentName) {
         let documentNameSuffix = ""
@@ -1164,7 +1160,7 @@ function createDocumentPrompt(){
 function renameDocumentPrompt(documentName){
     const newName = prompt("Enter a name for the DOCUMENT");
 
-    if (! newName){
+    if (!checkNameValidation(newName)){
         return
     }
     if(folderInfo.documents.some(doc => doc.name === newName)){
