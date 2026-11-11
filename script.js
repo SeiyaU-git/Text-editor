@@ -1,8 +1,16 @@
+const CONFETTI_COUNT = 100;
+const CONTEXT_MENU_LEFT_POSITION = "200px";
+const MINI_EDITOR_SCROLL_DIVISOR = -5;
+const MINI_EDITOR_SCROLL_OFFSET = 60;
+const SCROLL_SMOOTHING_FACTOR = 0.2;
+const AUTOSAVE_INTERVAL_MS = 25000;
+
 const editor = document.getElementById("editor")
 const miniEditor = document.querySelector(".mini_editor")
 
 
 //#region EDITOR
+// Keyboard shortcuts share the same commands as the editor's formatting controls.
 const shortcuts = {
   'b': () => document.execCommand('bold'),
   'i': () => document.execCommand('italic'),
@@ -21,24 +29,27 @@ const shortcuts = {
 //   }
 
 //#region UNDO AND REDO
+// Each entry stores the editor HTML for a point in the editing history.
 let documentHistory = []
 let historyIndex = -1  
 
 // let cursor_history = []
 
-function undo(){
-    historyIndex -= 1
-    if (historyIndex < 0) return
-    editor.innerHTML = documentHistory[historyIndex]
+function undo() {
+    // Keep the initial snapshot intact; there is no earlier state to restore then.
+    if (historyIndex <= 0) return;
 
-    console.log('undo')
+    historyIndex -= 1;
+    editor.innerHTML = documentHistory[historyIndex];
+
+    console.log("undo");
 }
 
 function redo(){
 
 }
 
-// Snapshop functions
+// Capture the editor's current HTML so it can be restored by undo.
 export function createSnapshot(){
     historyIndex += 1
     documentHistory[historyIndex] = editor.innerHTML;
@@ -59,6 +70,7 @@ export function clearSnapshot(){
 
 let isSaved = false
 const saveStatus = document.querySelector(".save_status")
+// Keep the save indicator's styling in sync with the current save state.
 function renderSaveStatus(){
     if (isSaved) saveStatus.classList.add("saved")
         else saveStatus.classList.remove("saved") 
@@ -67,7 +79,7 @@ function renderSaveStatus(){
 }
 
 
-// Create Snapshop 
+// Record editing actions and intercept supported Ctrl-key shortcuts.
 editor.addEventListener('keydown', (e) => {
     if (e.ctrlKey && shortcuts[e.key]) {
         e.preventDefault();
@@ -95,6 +107,7 @@ export function highlight(){
     
 }
 
+// A todo checkbox toggles completion; confetti is shown only when completing it.
 editor.addEventListener('click', (e) => {
     if (e.target.classList.contains('todo-checkbox')){
         const list = e.target.closest('.todo-item')
@@ -108,13 +121,14 @@ editor.addEventListener('click', (e) => {
         // Trigger colorful confetti
         jsConfetti.addConfetti({
         confettiColors: ['#ff0a54', '#474dff', '#94ff70'],
-        confettiNumber: 100
+        confettiNumber: CONFETTI_COUNT
         })
     }
 });
 
 
 function createTodoItem() {
+    // Build one editable todo row, keeping its checkbox separate from its label.
     // const list = document.createElement('ul');
     // list.classList.add('todolist');
     
@@ -142,6 +156,7 @@ function insertTodoItem() {
 
     const selectedText = selection.toString();
 
+    // Replace any selected text with a todo row containing that text.
     range.deleteContents();
 
     const list = document.createElement('div');
@@ -154,7 +169,7 @@ function insertTodoItem() {
 
     range.insertNode(list);
 
-    // Put the cursor at the end of the new todo
+    // Place the caret at the end of the label so typing can continue immediately.
     const label = checkboxItem.querySelector('.todo-text');
 
     const newRange = document.createRange();
@@ -184,6 +199,7 @@ editor.addEventListener('keydown', (e) => {
 
             const oldLabel = todoItem.querySelector('.todo-text');
 
+            // Enter on an empty row exits the list; otherwise split its text into a new row.
             if (oldLabel.textContent.trim() === "") {
                 const list = todoItem.closest(".todo-list");
 
@@ -229,6 +245,7 @@ editor.addEventListener('keydown', (e) => {
 });
 
 //#region Context Menu
+// These menus are positioned on demand and remember the tab or document being acted on.
 const editorContextMenu = document.getElementsByClassName("editor_context_menu")[0];
 const tabContextMenu = document.getElementsByClassName("tab_context_menu")[0]
 const docContextMenu = document.getElementsByClassName("document_context_menu")[0]
@@ -237,6 +254,7 @@ let selectedTab = ""
 let selectedDocument = ""
 
 document.addEventListener("contextmenu", (e) => {
+    // Close old menus and clear their previous selection before handling this click.
     tabContextMenu.classList.remove("active");
     editorContextMenu.classList.remove("active");
     docContextMenu.classList.remove("active");
@@ -269,7 +287,7 @@ document.addEventListener("contextmenu", (e) => {
     if (tabButton) {
         e.preventDefault();
 
-        tabContextMenu.style.left = "200px";
+        tabContextMenu.style.left = CONTEXT_MENU_LEFT_POSITION;
         tabContextMenu.style.top = `${e.clientY}px`;
         tabContextMenu.classList.add("active");
 
@@ -282,7 +300,7 @@ document.addEventListener("contextmenu", (e) => {
     if (docButton) {
         e.preventDefault();
 
-        docContextMenu.style.left = "200px";
+        docContextMenu.style.left = CONTEXT_MENU_LEFT_POSITION;
         docContextMenu.style.top = `${e.clientY}px`;
         docContextMenu.classList.add("active");
 
@@ -305,6 +323,8 @@ window.addEventListener("click", () => {
         docButton.classList.remove("selected");
     });
 })
+
+1 
 
 
 document.querySelectorAll(".editor_context_btn").forEach(button => {
@@ -364,9 +384,11 @@ document.querySelectorAll(".document_context_btn").forEach(button => {
 //#endregion
 
 
+// Save-point handles are kept per document for file-picker operations.
 let documentSavePoint = new Map();
 
 
+// Folder data is the in-memory model persisted to local storage and exported documents.
 let folderInfo = {
     documents: []
 }
@@ -394,6 +416,7 @@ let currentTab = null;
 //
 
 //#region LOCAL SCAVE FOLDER
+// Persist the folder model, first copying the active editor contents into its tab.
 function saveFolderLocal(){
     if(renderState === VIEW.EDITOR) saveTabDocument();
 
@@ -412,6 +435,7 @@ function loadFolderLocal(){
 //#endregion
 
 //#region DOCUMENT FUNCTIONS
+// Document helpers operate on folderInfo and keep the currently selected model in sync.
 function getDocument(document_name){
     const doc = folderInfo.documents.find(doc => doc.name === document_name);
     return doc;
@@ -425,8 +449,6 @@ function createDocument(name){
     };
 
     folderInfo.documents.push(doc_info);
-    // saveDocumentFolder(doc_info.name, doc_info)
-    //FIIXf
 }
 
 function deleteDocument(name){
@@ -467,6 +489,7 @@ function loadDocumentFolder(document_name) {
 //#endregion
 
 //#region TAB FUNCTIONS
+// Tab helpers locate and update the named tab within its parent document.
 function getTab(document_name, tab_name){
     const doc = getDocument(document_name);
 
@@ -530,7 +553,7 @@ function saveTabDocument(tab_name = currentTab, doc_name = currentDocument){
         return
     }
 
-    // Don't accidentally erase a tab
+    // An empty editor can result from a transient state; preserve non-empty saved content.
     if (editor.innerHTML === "" && tab.innerHTML !== "") {
         console.warn("Blocked accidental empty tab save");
         return;
@@ -544,12 +567,13 @@ function saveTabDocument(tab_name = currentTab, doc_name = currentDocument){
 
 //#region RENDER
 
-const TabList = document.querySelector(".tab_list");
+const tabList = document.querySelector(".tab_list");
 
 const emptyDocState = document.getElementById("empty_document_state")
 const emptyFolderState = document.getElementById("empty_folder_state")
 
 
+// Escape moves one level out of the editor views, saving the active tab before leaving it.
 document.addEventListener('keydown', (e) => {
     if (e.key == "Escape"){
         e.preventDefault();
@@ -579,6 +603,7 @@ const VIEW = {
 
 let renderState = VIEW.FOLDER
 
+// Render the selected view, then refresh navigation lists from the current folder model.
 function render(){
     switch (renderState) {
         case VIEW.EDITOR:
@@ -594,7 +619,7 @@ function render(){
 
 
     // tab rendering
-    TabList.innerHTML = '<button data-action="create-tab"><i class="bx bxs-file-plus"></i><span>New</span></button>'
+    tabList.innerHTML = '<button data-action="create-tab"><i class="bx bxs-file-plus"></i><span>New</span></button>'
     documentList.innerHTML = '<button data-action="create-document"><i class="bx bxs-file-plus"></i><span>New</span></button>'
 
     //FOR NOW
@@ -621,10 +646,10 @@ function renderDocumentMenu(){
     menuContainer.innerHTML = ""//"<button data-action='create-tab'><i class='bx bxs-file-plus'></i><span>Create New Tab</span></button>"
 
     for (const tab of documentInfo.tabs) {
-        const TabButton = document.createElement("button");
-        TabButton.classList.add("document_tab_btn");
-        TabButton.dataset.tabName = tab.name;
-        TabButton.dataset.action = "tab_btn"
+        const tabButton = document.createElement("button");
+        tabButton.classList.add("document_tab_btn");
+        tabButton.dataset.tabName = tab.name;
+        tabButton.dataset.action = "tab_btn"
 
         const icon = document.createElement("i");
         icon.classList.add("bx", "bxs-file-doc");
@@ -633,12 +658,12 @@ function renderDocumentMenu(){
         name.textContent = tab.name;
         
 
-        TabButton.appendChild(icon);
-        TabButton.appendChild(name);
+        tabButton.appendChild(icon);
+        tabButton.appendChild(name);
         
-        menuContainer.appendChild(TabButton);
+        menuContainer.appendChild(tabButton);
 
-        if (tab.name === currentTab) TabButton.classList.add("current");
+        if (tab.name === currentTab) tabButton.classList.add("current");
     }
 }
 
@@ -715,16 +740,16 @@ function renderMiniEditor(){
 
 
 function renderTabList(){
-    TabList.innerHTML = ""
+    tabList.innerHTML = ""
 
     
     for (const tab of documentInfo.tabs) {
 
         //Create the tab button
-        const TabButton = document.createElement("button");
-        TabButton.classList.add("document_tab_btn");
-        TabButton.dataset.tabName = tab.name;
-        TabButton.dataset.action = "tab_btn"
+        const tabButton = document.createElement("button");
+        tabButton.classList.add("document_tab_btn");
+        tabButton.dataset.tabName = tab.name;
+        tabButton.dataset.action = "tab_btn"
 
         const icon = document.createElement("i");
         icon.classList.add("bx", "bxs-file-doc");
@@ -733,17 +758,17 @@ function renderTabList(){
         name.textContent = tab.name;
         
 
-        TabButton.appendChild(icon);
-        TabButton.appendChild(name);
+        tabButton.appendChild(icon);
+        tabButton.appendChild(name);
         
-        TabList.appendChild(TabButton);
+        tabList.appendChild(tabButton);
         
         // ADD THE ACTIVE CLASS
-        if (tab.name === currentTab) TabButton.classList.add("current");
+        if (tab.name === currentTab) tabButton.classList.add("current");
     }
 
 
-    // TabList.innerHTML += '<button data-action="create-tab"><i class="bx bxs-file-plus"></i><span>New</span></button>'
+    // tabList.innerHTML += '<button data-action="create-tab"><i class="bx bxs-file-plus"></i><span>New</span></button>'
 }
 
 let documentList = document.querySelector(".document_list");
@@ -781,9 +806,10 @@ function renderDocumentList(){
 //#region scrolling
 
 
+// Keep the minimap aligned with the page as the main document scrolls.
 window.addEventListener("scroll", () => {
     const scrollAmount = window.scrollY;
-    miniEditor.style.top = `${scrollAmount / -5 + 60}px`;
+    miniEditor.style.top = `${scrollAmount / MINI_EDITOR_SCROLL_DIVISOR + MINI_EDITOR_SCROLL_OFFSET}px`;
 });
 
 let dragging = false;
@@ -793,6 +819,7 @@ function getScrollFromMouse(e) {
     const rect = miniEditor.getBoundingClientRect();
 
     const y = e.clientY - rect.top;
+    // Clamp the pointer position so dragging beyond the minimap stays within page bounds.
     const percentage = Math.max(0, Math.min(1, y / rect.height));
 
     const maxScroll =
@@ -802,7 +829,7 @@ function getScrollFromMouse(e) {
 }
 
 
-// CLICK / START DRAG
+// Clicking the minimap jumps to the corresponding position and begins dragging.
 miniEditor.addEventListener("mousedown", (e) => {
     dragging = true;
 
@@ -812,7 +839,7 @@ miniEditor.addEventListener("mousedown", (e) => {
 });
 
 
-// DRAG
+// During a drag, update the destination; smoothScroll performs the actual movement.
 miniEditor.addEventListener("mousemove", (e) => {
     if (!dragging) return;
 
@@ -821,13 +848,13 @@ miniEditor.addEventListener("mousemove", (e) => {
 });
 
 
-// STOP DRAG
+// Stop following the pointer once the mouse button is released anywhere on the page.
 window.addEventListener("mouseup", () => {
     dragging = false;
 });
 
 
-// SMOOTH DRAGGING
+// Ease toward the target instead of making each pointer movement a sudden jump.
 function smoothScroll() {
     if (dragging) {
         const current = window.scrollY;
@@ -836,7 +863,7 @@ function smoothScroll() {
 
         window.scrollTo(
             0,
-            current + difference * 0.2
+            current + difference * SCROLL_SMOOTHING_FACTOR
         );
     }
 
@@ -853,15 +880,11 @@ const tabElement = document.createElement("button");
 const sidebar = document.querySelector(".sidebar");
 const sidebarCollapseBtn = document.querySelector(".sidebar_collapse")
 
+// The CSS collapsed class controls the sidebar's compact presentation.
 sidebarCollapseBtn.addEventListener("click", () => {
     sidebar.classList.toggle("collapsed")
 })
 
-// createTab.addEventListener("click", () => {
-//     editor.innerHTML = "";
-//     // create a new tab
-//     const newTab = editor.cloneNode(true);
-// }
 
 
 
@@ -871,6 +894,7 @@ function downloadTab(tabName = currentTab) {
     saveTabDocument(tabName, currentDocument);
     const tab = getTab(currentDocument, tabName);
     const text = tab ? tab.innerHTML : "";
+    // Export the tab's stored HTML as a downloadable text file.
     const blob = new Blob([text], { type: "text/plain" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
@@ -882,11 +906,13 @@ function downloadTab(tabName = currentTab) {
 //#endregion
 
 //#region browser events
+// Save before the browser closes or navigates away from the editor.
 window.onbeforeunload = function(){
    saveFolderLocal();
 }
 
-window.onload = function exampleFunction(){
+// Load saved folder data, select its first document when available, and show the initial view.
+window.onload = function initializeEditor(){
     folderInfo = {
         documents: []
     }
@@ -909,13 +935,14 @@ window.onload = function exampleFunction(){
 
 let intervalId = setInterval(function() {
   saveFolderLocal();
-}, 25000);
+}, AUTOSAVE_INTERVAL_MS);
 
 //#endregion
 
 
 
 //#region DATA ACTION
+// Delegate clicks from dynamically rendered controls using their data-action attribute.
 document.addEventListener("click", (e) => {
     const button = e.target.closest("[data-action]");
     if (!button) return;
@@ -943,11 +970,11 @@ document.addEventListener("click", (e) => {
             break;
         
         case "rename-document":
-            renameDocumentPrompt(current_document);
+            renameDocumentPrompt(currentDocument);
             break;
         
         case "delete-document":
-            deleteDocumentPrompt(current_document);
+            deleteDocumentPrompt(currentDocument);
             break;
 
         case "download-document":
@@ -993,7 +1020,6 @@ document.addEventListener("click", (e) => {
             oldDocument = currentDocument;
             oldTab = currentTab;
 
-            //FIIIIX NOWWWWW FIX NOWW
             if(renderState == VIEW.EDITOR) saveTabDocument(oldTab, oldDocument)
             
             currentDocument = button.dataset.docName
@@ -1008,14 +1034,16 @@ document.addEventListener("click", (e) => {
 //#endregion
 
 //#region tab Prompt functions
+// Prompt helpers validate names, update the model, and refresh the relevant view.
 function createTabPrompt(){
     if (!documentInfo) return;
 
-    const newTabName = prompt("Enter a name for the new document:");
+    const newTabName = prompt("Enter a name for the new project:");
 
     if (newTabName) {
         let addText = "";
         let addIndex = 1;
+        // Add a numbered suffix when the requested name is already in use.
         while (documentInfo.tabs.some(tab => tab.name === newTabName + addText)) {
             addIndex += 1;
             addText = ` (${addIndex})`;
@@ -1065,23 +1093,6 @@ function deleteTabPrompt(tab){
     }
 }
 //#endregion
-
-// TODO
-// ADD SAVE TAB
-// ADD RELOAD INFO
-// ADD SAVE LOCAL STORAGE
-// ADD LOAD LOCAL STORAGE
-// RENAME VARIABLES
-
-
-
-
-//FIX NOW BROKEn
-// const fileInput = document.getElementById("fileInput");
-
-// loadTabButton.addEventListener("click", () => {
-//     fileInput.click();
-// });
 
 // fileInput.addEventListener("change", (event) => {
 //     const file = event.target.files[0];
@@ -1182,6 +1193,7 @@ function downloadDocument(documentName) {
     let documentData = getDocument(documentName);
     if (!documentData) return;
 
+    // Export the document model as JSON so its tabs and their contents can be imported again.
     documentData.type = "txtdoc";
 
     const documentJson = JSON.stringify(documentData)
@@ -1198,7 +1210,7 @@ function downloadDocument(documentName) {
 }
 //#endregion Document Prompt Functions
 
-// Import a document previously exported as a JSON file.
+// Import a document previously exported as JSON, checking its basic structure before use.
 const fileInput = document.getElementById("fileInput");
 fileInput.addEventListener("change", (event) => {
 

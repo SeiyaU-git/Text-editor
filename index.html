@@ -12,14 +12,16 @@
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
 </head>
 <body>
-    <!-- CDN installation -->
+    <!-- Confetti library loaded for use by the application scripts. -->
     <script src="https://cdn.jsdelivr.net/npm/js-confetti@latest/dist/js-confetti.browser.js"></script>
     
+    <!-- Sidebar controls project actions and displays project and tab lists. -->
     <button class = "sidebar_collapse"><i class='bx bx-sidebar'></i></button>
     <aside class = "sidebar">
         <div class = "spacer"></div>
         <nav>
             <h2>PROJECT</h2>
+            <!-- script.js uses each data-action value to handle the requested project operation. -->
             <div class="document_btns">
                 <button data-action="create-document">
                     <i class='bx bxs-file-plus'></i>
@@ -58,6 +60,7 @@
                 <span>Create save point</span>
             </button> -->
 
+            <!-- The application fills these lists with the available projects and tabs. -->
             <ul class = "document_list">
                 
             </ul>
@@ -101,7 +104,7 @@
         </div>
 
         <button class="save_status" data-action="savelocal"> 
-            Saved
+            Saved?
         </button>
 
     </aside>
@@ -109,6 +112,7 @@
     
 
     <main>
+        <!-- These panels provide the next available actions when no project or tab is open. -->
         <div id = "empty_document_state" class = "deactive empty_state">
             <h2>This project is empty</h2>
             <div class="big_container">
@@ -128,12 +132,12 @@
             <div class = 'big_container'>
                 <button data-action='create-document'>
                     <i class='bx bx-plus'></i>
-                    <span>Create New Document</span>
+                    <span>Create New Project</span>
                 </button>
 
                 <button data-action='load-document'>
                     <i class='bx bxs-file-import'></i>
-                    <span>Load Document</span>
+                    <span>Load Project</span>
                 </button>
             </div>
             
@@ -142,15 +146,18 @@
             </div>
         </div>
 
+        <!-- Displays the selected tab's content and accepts user edits. -->
         <div id="editor" contenteditable="true" class = "deactive"></div>
 
 
         
 
+        <!-- Main module wires interface actions to project, tab, and editor behaviour. -->
         <script type="module" src="script.js"></script>
         <!-- <script type="module" src="editor.js"></script> -->
 
         <!-- <input type="file" id="fileInput" accept=".txt" hidden> -->
+        <!-- Hidden file picker opened by the load-project action; accepts JSON files. -->
         <input type="file" id="fileInput" accept=".json" hidden>
         
 
@@ -158,6 +165,7 @@
     </main>
 
     <aside>
+        <!-- Compact, non-editable preview area for editor content. -->
         <div class = "mini_editor unselectable">
 
         </div>
@@ -183,6 +191,7 @@
 
     </aside>
 
+    <!-- Formatting commands offered for editor content. -->
     <div class = "context_menu editor_context_menu">
         <ul>
             <li><button class = "editor_context_btn" data-func = "bold"><i class='bx bx-bold'></i>  Bold <span>ctrl B</span></button></li>
@@ -193,12 +202,13 @@
             <li><button class = "editor_context_btn" data-func = "strike"><i class='bx bx-strikethrough'></i>  Strike <span></span></button></li> 
             <li><button class = "editor_context_btn" data-func = "highlight"><i class='bx bx-highlight'></i>  Highlight <span></span></button></li> 
 
-            <li><button class = "editor_context_btn" data-func = "todolist"><i class='bx bx-list-check'></i>  To-Do List <span>ctrl 7</span></button></li> 
+            <li><button class = "editor_context_btn" data-func = "todolist"><i class='bx bx-list-check'></i>  To-Do <span>ctrl 7</span></button></li> 
             
             
         </ul>
     </div>
 
+    <!-- Commands that operate on the selected tab. -->
     <div class = "context_menu tab_context_menu">
         <ul>
             <li><button class = "tab_context_btn" data-func = "create"> Create</button></li>
@@ -209,6 +219,7 @@
         </ul>
     </div>
 
+    <!-- Commands that operate on the selected project/document. -->
     <div class = "context_menu document_context_menu">
         <ul>
             <li><button class = "document_context_btn" data-func = "create"> Create</button></li>
