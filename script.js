@@ -30,30 +30,37 @@ const shortcuts = {
 
 //#region UNDO AND REDO
 // Each entry stores the editor HTML for a point in the editing history.
-let documentHistory = []
+let editorHistory = []
 let historyIndex = -1  
 
 // let cursor_history = []
 
 function undo() {
-    // Keep the initial snapshot intact; there is no earlier state to restore then.
     if (historyIndex <= 0) return;
 
     historyIndex -= 1;
-    editor.innerHTML = documentHistory[historyIndex];
-
-    console.log("undo");
+    editor.innerHTML = editorHistory[historyIndex];
+    renderMiniEditor();
+    isSaved = false;
+    renderSaveStatus();
 }
 
 function redo(){
-
+    if (historyIndex >= editorHistory.length - 1) return;
+    historyIndex += 1;
+    editor.innerHTML = editorHistory[historyIndex];
+    renderMiniEditor();
+    isSaved = false;
+    renderSaveStatus();
 }
 
 // Capture the editor's current HTML so it can be restored by undo.
 export function createSnapshot(){
-    historyIndex += 1
-    documentHistory[historyIndex] = editor.innerHTML;
-    // cursor_history[history_index] = 
+    const html = editor.innerHTML;
+    if (editorHistory[historyIndex] === html) return;
+    editorHistory = editorHistory.slice(0, historyIndex + 1);
+    editorHistory.push(html);
+    historyIndex = editorHistory.length - 1;
     isSaved = false 
     renderSaveStatus()
 
@@ -62,8 +69,7 @@ export function createSnapshot(){
 
 
 export function clearSnapshot(){
-    documentHistory = []
-    // cursor_history = []
+    editorHistory = [];
     historyIndex = -1  
 }
 
@@ -79,7 +85,8 @@ function renderSaveStatus(){
 }
 
 
-// Record editing actions and intercept supported Ctrl-key shortcuts.
+
+// Intercept supported Ctrl-key shortcuts. The resulting input event records formatting edits.
 editor.addEventListener('keydown', (e) => {
     if (e.ctrlKey && shortcuts[e.key]) {
         e.preventDefault();
@@ -245,30 +252,30 @@ editor.addEventListener('keydown', (e) => {
 });
 
 //#region Context Menu
-// These menus are positioned on demand and remember the tab or document being acted on.
+// These menus are positioned on demand and remember the tab or project being acted on.
 const editorContextMenu = document.getElementsByClassName("editor_context_menu")[0];
 const tabContextMenu = document.getElementsByClassName("tab_context_menu")[0]
-const docContextMenu = document.getElementsByClassName("document_context_menu")[0]
+const projectContextMenu = document.querySelector(".project_context_menu, .document_context_menu")
 
 let selectedTab = ""
-let selectedDocument = ""
+let selectedProject = ""
 
 document.addEventListener("contextmenu", (e) => {
     // Close old menus and clear their previous selection before handling this click.
     tabContextMenu.classList.remove("active");
     editorContextMenu.classList.remove("active");
-    docContextMenu.classList.remove("active");
+    projectContextMenu.classList.remove("active");
 
-    const tabButtons = document.getElementsByClassName("document_tab_btn");
+    const tabButtons = document.querySelectorAll(".tab_btn, .document_tab_btn");
 
     Array.from(tabButtons).forEach((tabButton) => {
         tabButton.classList.remove("selected");
     });
 
-    const docButtons = document.getElementsByClassName("document_btn");
+    const projectButtons = document.querySelectorAll(".project_btn, .document_btn");
 
-    Array.from(docButtons).forEach((docButton) => {
-        docButton.classList.remove("selected");
+    Array.from(projectButtons).forEach((projectButton) => {
+        projectButton.classList.remove("selected");
     });
 
 
@@ -282,7 +289,7 @@ document.addEventListener("contextmenu", (e) => {
         return;
     }
 
-    const tabButton = e.target.closest(".document_tab_btn");
+    const tabButton = e.target.closest(".tab_btn, .document_tab_btn");
 
     if (tabButton) {
         e.preventDefault();
@@ -295,32 +302,32 @@ document.addEventListener("contextmenu", (e) => {
         tabButton.classList.add("selected");
     }
 
-    const docButton = e.target.closest(".document_btn");
+    const projectButton = e.target.closest(".project_btn, .document_btn");
 
-    if (docButton) {
+    if (projectButton) {
         e.preventDefault();
 
-        docContextMenu.style.left = CONTEXT_MENU_LEFT_POSITION;
-        docContextMenu.style.top = `${e.clientY}px`;
-        docContextMenu.classList.add("active");
+        projectContextMenu.style.left = CONTEXT_MENU_LEFT_POSITION;
+        projectContextMenu.style.top = `${e.clientY}px`;
+        projectContextMenu.classList.add("active");
 
-        selectedDocument = docButton.dataset.docName;
-        docButton.classList.add("selected");
+        selectedProject = projectButton.dataset.projectName || projectButton.dataset.docName;
+        projectButton.classList.add("selected");
     }
 });
 
 window.addEventListener("click", () => {
     editorContextMenu.classList.remove("active")
     tabContextMenu.classList.remove("active")
-    docContextMenu.classList.remove("active")
-    const tabButtons = document.getElementsByClassName("document_tab_btn");
+    projectContextMenu.classList.remove("active")
+    const tabButtons = document.querySelectorAll(".tab_btn, .document_tab_btn");
     Array.from(tabButtons).forEach((tabButton) => {
         tabButton.classList.remove("selected");
     });
 
-    const docButtons = document.getElementsByClassName("document_btn");
-    Array.from(docButtons).forEach((docButton) => {
-        docButton.classList.remove("selected");
+    const projectButtons = document.querySelectorAll(".project_btn, .document_btn");
+    Array.from(projectButtons).forEach((projectButton) => {
+        projectButton.classList.remove("selected");
     });
 })
 
@@ -362,19 +369,19 @@ document.querySelectorAll(".tab_context_btn").forEach(button => {
     });
 });
 
-document.querySelectorAll(".document_context_btn").forEach(button => {
+document.querySelectorAll(".project_context_btn, .document_context_btn").forEach(button => {
     button.addEventListener("click", function() {
-        docContextMenu.classList.remove("active");
+        projectContextMenu.classList.remove("active");
 
         switch(this.dataset.func){ 
-            case "create": createDocumentPrompt(); break;
-            case "delete": deleteDocumentPrompt(selectedDocument); break;
-            case "rename": renameDocumentPrompt(selectedDocument); break;
+            case "create": createProjectPrompt(); break;
+            case "delete": deleteProjectPrompt(selectedProject); break;
+            case "rename": renameProjectPrompt(selectedProject); break;
         }
 
-        const docButtons = document.getElementsByClassName("document_btn");
-        Array.from(docButtons).forEach((docButton) => {
-            docButton.classList.remove("selected");
+        const projectButtons = document.querySelectorAll(".project_btn, .document_btn");
+        Array.from(projectButtons).forEach((projectButton) => {
+            projectButton.classList.remove("selected");
         });
     });
 });
@@ -384,26 +391,26 @@ document.querySelectorAll(".document_context_btn").forEach(button => {
 //#endregion
 
 
-// Save-point handles are kept per document for file-picker operations.
-let documentSavePoint = new Map();
+// Save-point handles are kept per project for file-picker operations.
+let projectSavePoint = new Map();
 
 
-// Folder data is the in-memory model persisted to local storage and exported documents.
+// Folder data is the in-memory model persisted to local storage and exported projects.
 let folderInfo = {
-    documents: []
+    projects: []
 }
 
-let documentInfo = null;
-let currentDocument = null;
+let projectInfo = null;
+let currentProject = null;
 
 let currentTab = null;
 
 // 📦 folder (Object)
 // │    
-// └── 📋 documents (Array)
+// └── 📋 projects (Array)
 //      |
 //      │   name
-//      └── 📦 document (Object)
+//      └── 📦 project (Object)
 //           |
 //           │   name
 //           └── 📋 tabs (Array)
@@ -418,7 +425,7 @@ let currentTab = null;
 //#region LOCAL SCAVE FOLDER
 // Persist the folder model, first copying the active editor contents into its tab.
 function saveFolderLocal(){
-    if(renderState === VIEW.EDITOR) saveTabDocument();
+    if(renderState === VIEW.EDITOR) saveTab();
 
     localStorage.setItem("data", JSON.stringify(folderInfo))
     isSaved = true
@@ -429,81 +436,102 @@ function loadFolderLocal(){
     const savedData = localStorage.getItem("data");
 
     if (savedData) {
-        folderInfo = JSON.parse(savedData);
+        let savedFolder;
+        try {
+            savedFolder = JSON.parse(savedData);
+        } catch (error) {
+            console.warn("Saved project data is invalid JSON; keeping the current folder data.");
+            return;
+        }
+        if (!savedFolder || typeof savedFolder !== "object") return;
+
+        const projects = Array.isArray(savedFolder.projects) ? savedFolder.projects : [];
+        const legacyProjects = Array.isArray(savedFolder.documents) ? savedFolder.documents : [];
+        // Merge legacy entries without replacing current project data or losing tabs.
+        for (const legacyProject of legacyProjects) {
+            if (!legacyProject || typeof legacyProject.name !== "string") continue;
+            if (!projects.some(project => project && project.name === legacyProject.name)) {
+                projects.push(legacyProject);
+            }
+        }
+        folderInfo = { ...savedFolder, projects };
+        delete folderInfo.documents;
     }
 }
 //#endregion
 
-//#region DOCUMENT FUNCTIONS
-// Document helpers operate on folderInfo and keep the currently selected model in sync.
-function getDocument(document_name){
-    const doc = folderInfo.documents.find(doc => doc.name === document_name);
-    return doc;
+//#region PROJECT FUNCTIONS
+// Project helpers operate on folderInfo and keep the currently selected model in sync.
+function getProject(projectName){
+    const project = folderInfo.projects.find(project => project && project.name === projectName);
+    return project;
 }
 
-function createDocument(name){
-    const doc_info = {
+function createProject(name){
+    const projectInfo = {
         name: name,
         saved: true,
         tabs: [],
     };
 
-    folderInfo.documents.push(doc_info);
+    folderInfo.projects.push(projectInfo);
 }
 
-function deleteDocument(name){
-    const doc = getDocument(name);
+function deleteProject(name){
+    const project = getProject(name);
+    const wasSelected = currentProject === name;
 
-    const index = folderInfo.documents.findIndex(
-        item => item === doc
+    const index = folderInfo.projects.findIndex(
+        item => item === project
     );
 
     if (index === -1) return;
 
-    folderInfo.documents.splice(index, 1);
+    folderInfo.projects.splice(index, 1);
 
-    if (folderInfo.documents.length > 0) {
-        loadDocumentFolder(folderInfo.documents[0].name);
-    } else {
-        documentInfo = null;
-        currentDocument = null;
+    if (wasSelected && folderInfo.projects.length > 0) {
+        loadProject(folderInfo.projects[0].name);
+    } else if (wasSelected) {
+        projectInfo = null;
+        currentProject = null;
         currentTab = null;
     }
 }
 
-function renameDocument(name, new_name){
-    const doc = getDocument(name);
-    doc.name = new_name;
+function renameProject(name, newName){
+    const project = getProject(name);
+    if (!project) return false;
+    project.name = newName;
+    return true;
 }
 
-function loadDocumentFolder(document_name) {
-    let doc = getDocument(document_name);
-    documentInfo = doc;
-    currentDocument = documentInfo.name
+function loadProject(projectName) {
+    projectInfo = getProject(projectName);
+    if (!projectInfo) return;
+    currentProject = projectInfo.name
     
-    if (documentInfo.tabs.length > 0) {
-        currentTab = documentInfo.tabs[0].name;
-    }
+    currentTab = projectInfo.tabs.length > 0 ? projectInfo.tabs[0].name : null;
 }
 
 //#endregion
 
 //#region TAB FUNCTIONS
-// Tab helpers locate and update the named tab within its parent document.
-function getTab(document_name, tab_name){
-    const doc = getDocument(document_name);
+// Tab helpers locate and update the named tab within its parent project.
+function getTab(projectName, tabName){
+    const project = getProject(projectName);
 
-    if (!doc) {
+    if (!project) {
         return null;
     }
 
-    const tab = doc.tabs.find(t => t.name === tab_name);
+    const tab = project.tabs.find(t => t.name === tabName);
 
     return tab || null;
 }
 
-function createTab(document_name, name){
-    let doc = getDocument(document_name);
+function createTab(projectName, name){
+    let project = getProject(projectName);
+    if (!project) return false;
 
     const tab = {
         name: name,
@@ -512,51 +540,55 @@ function createTab(document_name, name){
     }
 
     
-    doc.tabs.push(tab)
+    project.tabs.push(tab)
+    return true;
 
     // saveTabDocument()
      
 }
 
 function getTabIndex(tab_name){
-    return documentInfo.tabs.findIndex(tab => tab.name === tab_name);
+    return projectInfo && Array.isArray(projectInfo.tabs)
+        ? projectInfo.tabs.findIndex(tab => tab.name === tab_name)
+        : -1;
 }
 
-function renameTabDocument(document_name, name, new_name){
-    let doc = getDocument(document_name);
-    let tab = getTab(document_name, name)
-    tab.name = new_name 
+function renameTab(projectName, name, newName){
+    let tab = getTab(projectName, name)
+    if (!tab) return false;
+    tab.name = newName 
+    return true;
 }
 
-function deleteTabDocument(document_name, name){
-    let doc = getDocument(document_name);
-    const index = doc.tabs.findIndex(
+function deleteTab(projectName, name){
+    let project = getProject(projectName);
+    if (!project) return false;
+    const index = project.tabs.findIndex(
         t => t.name === name
     );
 
 
     
-    doc.tabs.splice(index, 1)
+    if (index === -1) return false;
+    project.tabs.splice(index, 1)
+    if (projectName === currentProject && currentTab === name) {
+        currentTab = project.tabs.length ? project.tabs[Math.min(index, project.tabs.length - 1)].name : null;
+    }
+    return true;
 }
 
-function saveTabDocument(tab_name = currentTab, doc_name = currentDocument){
-    if (!doc_name || !tab_name) return;
+function saveTab(tabName = currentTab, projectName = currentProject){
+    if (!projectName || !tabName) return;
     
-    const doc = getDocument(doc_name);
-    if (!doc || doc.tabs.length <= 0) {
+    const project = getProject(projectName);
+    if (!project || project.tabs.length <= 0) {
         return
     }
     
-    const tab = getTab(doc_name, tab_name)
+    const tab = getTab(projectName, tabName)
 
     if (!tab) {
         return
-    }
-
-    // An empty editor can result from a transient state; preserve non-empty saved content.
-    if (editor.innerHTML === "" && tab.innerHTML !== "") {
-        console.warn("Blocked accidental empty tab save");
-        return;
     }
 
     tab.innerHTML = editor.innerHTML;
@@ -569,7 +601,7 @@ function saveTabDocument(tab_name = currentTab, doc_name = currentDocument){
 
 const tabList = document.querySelector(".tab_list");
 
-const emptyDocState = document.getElementById("empty_document_state")
+const emptyProjectState = document.getElementById("empty_project_state") || document.getElementById("empty_document_state")
 const emptyFolderState = document.getElementById("empty_folder_state")
 
 
@@ -579,11 +611,11 @@ document.addEventListener('keydown', (e) => {
         e.preventDefault();
         switch(renderState){
             case VIEW.EDITOR:
-                saveTabDocument();
-                renderState = VIEW.DOCUMENTS;
+                saveTab();
+                renderState = VIEW.PROJECTS;
                 break;
             
-            case VIEW.DOCUMENTS:
+            case VIEW.PROJECTS:
                 renderState = VIEW.FOLDER;
                 break;
             
@@ -597,7 +629,7 @@ document.addEventListener('keydown', (e) => {
 
 const VIEW = {
     EDITOR: 0,
-    DOCUMENTS: 1,
+    PROJECTS: 1,
     FOLDER: 2
 };
 
@@ -609,8 +641,8 @@ function render(){
         case VIEW.EDITOR:
             renderEditor();
             break;
-        case VIEW.DOCUMENTS:
-            renderDocumentMenu();
+        case VIEW.PROJECTS:
+            renderProjectMenu();
             break;
         case VIEW.FOLDER:
             renderFolderMenu();
@@ -619,35 +651,22 @@ function render(){
 
 
     // tab rendering
-    tabList.innerHTML = '<button data-action="create-tab"><i class="bx bxs-file-plus"></i><span>New</span></button>'
-    documentList.innerHTML = '<button data-action="create-document"><i class="bx bxs-file-plus"></i><span>New</span></button>'
-
-    //FOR NOW
-    if (!folderInfo.documents || folderInfo.documents.length == 0){
-        return
-    }
-
-    renderDocumentList()
-
-    if (!documentInfo.tabs || documentInfo.tabs.length == 0){
-        return
-    }
-    
+    renderProjectList()
     renderTabList()
 }
 
-function renderDocumentMenu(){
-    emptyDocState.classList.remove("deactive")
+function renderProjectMenu(){
+    emptyProjectState.classList.remove("deactive")
     editor.classList.add("deactive")
     emptyFolderState.classList.add("deactive")
 
 
-    const menuContainer = emptyDocState.querySelectorAll(".big_container")[1]
+    const menuContainer = emptyProjectState.querySelectorAll(".big_container")[1]
     menuContainer.innerHTML = ""//"<button data-action='create-tab'><i class='bx bxs-file-plus'></i><span>Create New Tab</span></button>"
 
-    for (const tab of documentInfo.tabs) {
+    for (const tab of (projectInfo?.tabs || [])) {
         const tabButton = document.createElement("button");
-        tabButton.classList.add("document_tab_btn");
+        tabButton.classList.add("tab_btn");
         tabButton.dataset.tabName = tab.name;
         tabButton.dataset.action = "tab_btn"
 
@@ -670,7 +689,7 @@ function renderDocumentMenu(){
 function renderFolderMenu(){
     emptyFolderState.classList.remove("deactive")
     editor.classList.add("deactive")
-    emptyDocState.classList.add("deactive")
+    emptyProjectState.classList.add("deactive")
 
     
     const menuContainer = emptyFolderState.querySelectorAll(".big_container")[1]
@@ -679,24 +698,24 @@ function renderFolderMenu(){
     menuContainer.innerHTML = ""//"<button data-action='create-document'><i class='bx bx-plus'></i><span>Create New Document</span></button><button data-action='load-document'><i class='bx bxs-file-import'></i><span>Load Document</span></button>"
     
 
-    for (let doc of folderInfo.documents) {
-        let docBtn = document.createElement("button");
-        docBtn.classList.add("document_btn");
-        docBtn.dataset.docName = doc.name;
-        docBtn.dataset.action = "document_tab_btn"
+    for (const project of folderInfo.projects) {
+        const projectButton = document.createElement("button");
+        projectButton.classList.add("project_btn");
+        projectButton.dataset.projectName = project.name;
+        projectButton.dataset.action = "project_btn"
 
         const icon = document.createElement("i");
         icon.classList.add("bx", "bxs-file-doc");
 
         const name = document.createElement("span");
-        name.textContent = doc.name;
+        name.textContent = project.name;
 
-        docBtn.appendChild(icon);
-        docBtn.appendChild(name);
+        projectButton.appendChild(icon);
+        projectButton.appendChild(name);
         
-        menuContainer.appendChild(docBtn);
+        menuContainer.appendChild(projectButton);
 
-        if (doc.name === currentDocument) docBtn.classList.add("current");
+        if (project.name === currentProject) projectButton.classList.add("current");
     }
 }
 
@@ -704,34 +723,35 @@ function renderEditor(){
     editor.classList.add("deactive")
 
     emptyFolderState.classList.add("deactive")
-    emptyDocState.classList.add("deactive")
-    if (!folderInfo.documents || folderInfo.documents.length == 0){
+    emptyProjectState.classList.add("deactive")
+    if (!folderInfo.projects || folderInfo.projects.length === 0){
         emptyFolderState.classList.remove("deactive")
         return
     }
     
-    if (!documentInfo || !documentInfo.tabs || documentInfo.tabs.length == 0){
-        emptyDocState.classList.remove("deactive")
+    if (!projectInfo || !projectInfo.tabs || projectInfo.tabs.length === 0){
+        emptyProjectState.classList.remove("deactive")
         return
     }
     
     
     editor.classList.remove("deactive")
-    renderTab(currentDocument, currentTab)
+    renderTab(currentProject, currentTab)
 }
 
-function renderTab(document_name, tab_name){
+function renderTab(projectName, tabName){
     
     // editor.innerHTML = ""
-    let doc = getDocument(document_name)
-    const tab = getTab(document_name, tab_name)
+    const tab = getTab(projectName, tabName)
     if(!tab) return
     editor.innerHTML = tab.innerHTML
+    clearSnapshot();
+    createSnapshot();
 }
 
 function renderMiniEditor(){
     miniEditor.classList.add("deactive")
-    if (!folderInfo.documents || folderInfo.documents.length == 0){
+    if (!folderInfo.projects || folderInfo.projects.length === 0){
         return
     }
     miniEditor.classList.remove("deactive")
@@ -740,14 +760,16 @@ function renderMiniEditor(){
 
 
 function renderTabList(){
-    tabList.innerHTML = ""
+    const createButton = tabList.querySelector('[data-action="create-tab"]');
+    tabList.innerHTML = "";
+    if (createButton) tabList.appendChild(createButton);
 
     
-    for (const tab of documentInfo.tabs) {
+    for (const tab of (projectInfo?.tabs || [])) {
 
         //Create the tab button
         const tabButton = document.createElement("button");
-        tabButton.classList.add("document_tab_btn");
+        tabButton.classList.add("tab_btn");
         tabButton.dataset.tabName = tab.name;
         tabButton.dataset.action = "tab_btn"
 
@@ -771,28 +793,30 @@ function renderTabList(){
     // tabList.innerHTML += '<button data-action="create-tab"><i class="bx bxs-file-plus"></i><span>New</span></button>'
 }
 
-let documentList = document.querySelector(".document_list");
-function renderDocumentList(){
-    documentList.innerHTML = ""
+let projectList = document.querySelector(".project_list, .document_list");
+function renderProjectList(){
+    const createButton = projectList.querySelector('[data-action="create-project"]');
+    projectList.innerHTML = "";
+    if (createButton) projectList.appendChild(createButton);
     
-    for (let doc of folderInfo.documents) {
-        let docBtn = document.createElement("button");
-        docBtn.classList.add("document_btn");
-        docBtn.dataset.docName = doc.name;
-        docBtn.dataset.action = "document_tab_btn"
+    for (const project of folderInfo.projects) {
+        const projectButton = document.createElement("button");
+        projectButton.classList.add("project_btn");
+        projectButton.dataset.projectName = project.name;
+        projectButton.dataset.action = "project_btn"
 
         const icon = document.createElement("i");
         icon.classList.add("bx", "bxs-file-doc");
 
         const name = document.createElement("span");
-        name.textContent = doc.name;
+        name.textContent = project.name;
 
-        docBtn.appendChild(icon);
-        docBtn.appendChild(name);
+        projectButton.appendChild(icon);
+        projectButton.appendChild(name);
         
-        documentList.appendChild(docBtn);
+        projectList.appendChild(projectButton);
 
-        if (doc.name === currentDocument) docBtn.classList.add("current");
+        if (project.name === currentProject) projectButton.classList.add("current");
 
     }
 
@@ -889,10 +913,10 @@ sidebarCollapseBtn.addEventListener("click", () => {
 
 
 function downloadTab(tabName = currentTab) {
-    if (!currentDocument || !tabName) return;
+    if (!currentProject || !tabName) return;
 
-    saveTabDocument(tabName, currentDocument);
-    const tab = getTab(currentDocument, tabName);
+    saveTab(tabName, currentProject);
+    const tab = getTab(currentProject, tabName);
     const text = tab ? tab.innerHTML : "";
     // Export the tab's stored HTML as a downloadable text file.
     const blob = new Blob([text], { type: "text/plain" });
@@ -911,18 +935,18 @@ window.onbeforeunload = function(){
    saveFolderLocal();
 }
 
-// Load saved folder data, select its first document when available, and show the initial view.
+// Load saved folder data, select its first project when available, and show the initial view.
 window.onload = function initializeEditor(){
     folderInfo = {
-        documents: []
+        projects: []
     }
     // localStorage.clear()
     loadFolderLocal();
 
     console.log("LOADED FROM LOCAL STORAGE:", folderInfo);
 
-    if (folderInfo.documents.length > 0) {
-        loadDocumentFolder(folderInfo.documents[0].name);
+    if (folderInfo.projects.length > 0) {
+        loadProject(folderInfo.projects[0].name);
     }
     
 
@@ -949,7 +973,7 @@ document.addEventListener("click", (e) => {
 
     const action = button.dataset.action;
 
-    let oldDocument = ""
+    let oldProject = ""
     let oldTab = ""
 
     switch (action) {
@@ -965,30 +989,30 @@ document.addEventListener("click", (e) => {
             deleteTabPrompt(currentTab);
             break;
         
-        case "create-document":
-            createDocumentPrompt();
+        case "create-project":
+            createProjectPrompt();
             break;
         
-        case "rename-document":
-            renameDocumentPrompt(currentDocument);
+        case "rename-project":
+            renameProjectPrompt(currentProject);
             break;
         
-        case "delete-document":
-            deleteDocumentPrompt(currentDocument);
+        case "delete-project":
+            deleteProjectPrompt(currentProject);
             break;
 
-        case "download-document":
-            downloadDocument(currentDocument);
+        case "download-project":
+            downloadProject(currentProject);
             break;
         
-        case "load-document":
+        case "load-project":
             fileInput.click();
             break;
         
-        case "close-document":
-            saveTabDocument(currentTab, currentDocument);
-            downloadDocument(currentDocument);
-            deleteDocument(currentDocument);
+        case "close-project":
+            saveTab(currentTab, currentProject);
+            downloadProject(currentProject);
+            deleteProject(currentProject);
             render();
             break;
 
@@ -1002,31 +1026,29 @@ document.addEventListener("click", (e) => {
             break;
 
         case "tab_btn":
-            oldDocument = currentDocument;
+            oldProject = currentProject;
             oldTab = currentTab;    
 
-            if(renderState == VIEW.EDITOR) saveTabDocument(oldTab, oldDocument)
+            if(renderState == VIEW.EDITOR) saveTab(oldTab, oldProject)
                 
             currentTab = button.dataset.tabName;
             renderState = VIEW.EDITOR;
             render()
-
-            clearSnapshot();
-            createSnapshot();
             break;
         
         
-        case "document_tab_btn":
-            oldDocument = currentDocument;
+        case "project_btn":
+            oldProject = currentProject;
             oldTab = currentTab;
 
-            if(renderState == VIEW.EDITOR) saveTabDocument(oldTab, oldDocument)
+            if(renderState == VIEW.EDITOR) saveTab(oldTab, oldProject)
             
-            currentDocument = button.dataset.docName
-            loadDocumentFolder(currentDocument);
+            currentProject = button.dataset.projectName
+            loadProject(currentProject);
             
-            renderState = VIEW.DOCUMENTS;
+            renderState = VIEW.PROJECTS;
             render();
+            clearSnapshot();
             break;
         
     }
@@ -1036,26 +1058,20 @@ document.addEventListener("click", (e) => {
 //#region tab Prompt functions
 // Prompt helpers validate names, update the model, and refresh the relevant view.
 function createTabPrompt(){
-    if (!documentInfo) return;
+    if (!projectInfo) return;
 
-    const newTabName = prompt("Enter a name for the new project:");
+    const newTabName = prompt("Enter a name for the new tab:");
 
-    if (newTabName) {
-        let addText = "";
-        let addIndex = 1;
-        // Add a numbered suffix when the requested name is already in use.
-        while (documentInfo.tabs.some(tab => tab.name === newTabName + addText)) {
-            addIndex += 1;
-            addText = ` (${addIndex})`;
-        }
-
-        saveTabDocument(currentTab, currentDocument);
-        documentInfo.tabs.push({
-            name: newTabName + addText,
-            innerHTML: "",
-            saved: true,
-        });
-        currentTab = newTabName + addText;
+    if (!checkNameValidation(newTabName)) return;
+    if (projectInfo.tabs.some(tab => tab.name === newTabName.trim())) {
+        alert("A tab with that name already exists.");
+        return;
+    }
+    {
+        const name = newTabName.trim();
+        saveTab(currentTab, currentProject);
+        createTab(currentProject, name);
+        currentTab = name;
 
         renderState = VIEW.EDITOR;
         render();
@@ -1063,32 +1079,30 @@ function createTabPrompt(){
 };
 
 function renameTabPrompt(tab){
+    if (!projectInfo || !getTab(currentProject, tab)) return;
     const newName = prompt("Enter a name for the tab")
 
     if (!checkNameValidation(newName)){
         return
     }
-    if(documentInfo.tabs.some(tab => tab.name === newName)){
+    const trimmedName = newName.trim();
+    if(projectInfo.tabs.some(existingTab => existingTab.name === trimmedName)){
         alert("A tab with that name already exists.");
         return;
     }
 
-    if (tab == currentTab) currentTab = newName
-    renameTabDocument(currentDocument, tab, newName)
+    if (!renameTab(currentProject, tab, trimmedName)) return;
+    if (tab === currentTab) currentTab = trimmedName
     
     render()
 }
 
 function deleteTabPrompt(tab){
+    if (!projectInfo || !getTab(currentProject, tab)) return;
     if (confirm(`Are you sure you want to delete the tab "${tab}"?`)) {
-        deleteTabDocument(currentDocument, tab)
+        if (!deleteTab(currentProject, tab)) return;
         
-        if (tab === currentTab) {
-            currentTab = documentInfo.tabs.length > 0
-                ? documentInfo.tabs[0].name
-                : null;
-        }
-
+        if (projectInfo.tabs.length === 0) renderState = VIEW.PROJECTS;
         render()
     }
 }
@@ -1107,8 +1121,8 @@ function checkNameValidation(name) {
     return true;
 }
 
-//#region Document Prompt Functions
-// Opens the browser file picker and remembers where the current document is saved.
+//#region Project Prompt Functions
+// Opens the browser file picker and remembers where the current project is saved.
 async function promptSavePoint(){
     try {
     const handle = await window.showSaveFilePicker({types: [
@@ -1120,7 +1134,7 @@ async function promptSavePoint(){
             }
         ]});
     
-    documentSavePoint.set(currentDocument, handle);
+    projectSavePoint.set(currentProject, handle);
     
     } catch (error) {
         // User cancelled
@@ -1128,85 +1142,85 @@ async function promptSavePoint(){
 }
 
 
-function createDocumentPrompt(){
-    const newDocumentName = prompt("Enter a name for the new document:");
+function createProjectPrompt(){
+    const newProjectName = prompt("Enter a name for the new project:");
 
-    if (!checkNameValidation(newDocumentName)){
+    if (!checkNameValidation(newProjectName)){
         return
     }
 
-    if (newDocumentName) {
-        let documentNameSuffix = ""
-        let documentNameNumber = 1
-        // Add a number so that document names remain unique.
-        while(folderInfo.documents.some(doc => doc.name === newDocumentName + documentNameSuffix)){
-            documentNameNumber += 1
-            documentNameSuffix = ` (${documentNameNumber})`
-        }
-
-        if(folderInfo.documents.length > 0 && renderState == VIEW.EDITOR)
-        {
-            saveTabDocument(); 
-        }
-
-        createDocument(newDocumentName + documentNameSuffix)
-        loadDocumentFolder(newDocumentName + documentNameSuffix)
-
-        renderState = VIEW.DOCUMENTS;
-        render();
+    const projectName = newProjectName.trim();
+    if (folderInfo.projects.some(project => project.name === projectName)) {
+        alert("A project with that name already exists.");
+        return;
     }
+
+    if(renderState === VIEW.EDITOR) saveTab();
+    createProject(projectName);
+    loadProject(projectName);
+    currentTab = null;
+
+    renderState = VIEW.PROJECTS;
+    render();
 };
 
-function renameDocumentPrompt(documentName){
-    const newName = prompt("Enter a name for the DOCUMENT");
+function renameProjectPrompt(projectName){
+    if (!getProject(projectName)) return;
+    const newName = prompt("Enter a name for the project");
 
     if (!checkNameValidation(newName)){
         return
     }
-    if(folderInfo.documents.some(doc => doc.name === newName)){
-        alert("A document with that name already exists.");
+    const trimmedName = newName.trim();
+    if(folderInfo.projects.some(project => project.name === trimmedName && project.name !== projectName)){
+        alert("A project with that name already exists.");
         return;
     }
 
-    if (documentName == currentDocument) currentDocument = newName
-    renameDocument(documentName, newName)
+    if (!renameProject(projectName, trimmedName)) return;
+    if (projectName === currentProject) currentProject = trimmedName;
     
     render()
 }
 
-function deleteDocumentPrompt(documentName){
-    if (confirm(`Are you sure you want to delete the DOCUMENT "${documentName}"?`)) {
-        deleteDocument(documentName)
+function deleteProjectPrompt(projectName){
+    if (!getProject(projectName)) return;
+    if (confirm(`Are you sure you want to delete the project "${projectName}"?`)) {
+        if (renderState === VIEW.EDITOR && projectName === currentProject) saveTab();
+        deleteProject(projectName)
+        if (projectName === currentProject || !currentProject) {
+            renderState = folderInfo.projects.length ? VIEW.PROJECTS : VIEW.FOLDER;
+        }
         
         render()
     }
 }
 
-function downloadDocument(documentName) {
-    if (!documentName) return;
+function downloadProject(projectName) {
+    if (!projectName) return;
 
-    saveTabDocument(currentTab, currentDocument);
-    let documentData = getDocument(documentName);
-    if (!documentData) return;
+    saveTab(currentTab, currentProject);
+    const projectData = getProject(projectName);
+    if (!projectData) return;
 
-    // Export the document model as JSON so its tabs and their contents can be imported again.
-    documentData.type = "txtdoc";
+    const exportData = { ...projectData, tabs: projectData.tabs.map(tab => ({ ...tab })) };
+    exportData.type = "txtproject";
 
-    const documentJson = JSON.stringify(documentData)
+    const projectJson = JSON.stringify(exportData)
 
-    const blob = new Blob([documentJson], {
+    const blob = new Blob([projectJson], {
         type: "application/json"
     })
 
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = `${documentData.name}.json`;
+    link.download = `${projectData.name}.json`;
     link.click();
     URL.revokeObjectURL(link.href)
 }
-//#endregion Document Prompt Functions
+//#endregion Project Prompt Functions
 
-// Import a document previously exported as JSON, checking its basic structure before use.
+// Import a project previously exported as JSON, checking its structure before use.
 const fileInput = document.getElementById("fileInput");
 fileInput.addEventListener("change", (event) => {
 
@@ -1217,7 +1231,7 @@ fileInput.addEventListener("change", (event) => {
     const fileExtension = file.name.split(".").pop().toLowerCase();
 
     if (fileExtension !== "json") {
-        alert("Invalid file type. Please select a JSON document.");
+        alert("Invalid file type. Please select a JSON project.");
         fileInput.value = "";
         return;
     }
@@ -1227,22 +1241,29 @@ fileInput.addEventListener("change", (event) => {
     reader.onload = () => {
 
         try {
-            const documentData = JSON.parse(reader.result);
-            //documentData.type !== "txtdoc" ||
-            if (typeof documentData.name !== "string" ||
-                !Array.isArray(documentData.tabs)) {
+            const projectData = JSON.parse(reader.result);
+            if (!projectData || typeof projectData.name !== "string" ||
+                !projectData.name.trim() || !Array.isArray(projectData.tabs) ||
+                projectData.tabs.some(tab => !tab || typeof tab.name !== "string" || typeof tab.innerHTML !== "string")) {
 
-                alert("Invalid document format. Please select a valid document created by this program.");
+                alert("Invalid project format. Please select a valid project created by this program.");
                 fileInput.value = "";
                 return;
             }
 
-                    folderInfo.documents.push(documentData);
+            const importedProject = { ...projectData, name: projectData.name.trim() };
+            delete importedProject.type;
+            const duplicate = folderInfo.projects.some(project => project.name === importedProject.name);
+            if (duplicate) importedProject.name = `${importedProject.name} (imported)`;
+            if (folderInfo.projects.some(project => project.name === importedProject.name)) {
+                alert("A project with that name already exists.");
+                fileInput.value = "";
+                return;
+            }
+            folderInfo.projects.push(importedProject);
+            loadProject(importedProject.name);
 
-            currentDocument = documentData.name;
-
-            loadDocumentFolder(currentDocument);
-
+            renderState = importedProject.tabs.length ? VIEW.EDITOR : VIEW.PROJECTS;
             render();
 
             clearSnapshot();

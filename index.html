@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content=" width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Project</title>
     <link rel="stylesheet" href="style.css">
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -22,33 +22,33 @@
         <nav>
             <h2>PROJECT</h2>
             <!-- script.js uses each data-action value to handle the requested project operation. -->
-            <div class="document_btns">
-                <button data-action="create-document">
+            <div class="project_btns">
+                <button data-action="create-project">
                     <i class='bx bxs-file-plus'></i>
                     <span>New</span>
                 </button>
 
-                <button data-action="delete-document">
+                <button data-action="delete-project">
                     <i class='bx bxs-trash'></i>
                     <span>Del</span>
                 </button>
 
-                <button data-action="rename-document">
+                <button data-action="rename-project">
                     <i class='bx bxs-rename' ></i>
                     <span>Rena</span>
                 </button>
 
-                <button data-action="download-document">
+                <button data-action="download-project">
                     <i class='bx bxs-save' ></i>
                     <span>Save</span>
                 </button>
 
-                <button data-action="load-document">
+                <button data-action="load-project">
                     <i class='bx bxs-file-import'></i>
                     <span>Load</span>
                 </button>
 
-                <button data-action="close-document">
+                <button data-action="close-project">
                     <i class='bx bxs-save' ></i>
                     <span>Save & Close</span>
                 </button>
@@ -61,7 +61,7 @@
             </button> -->
 
             <!-- The application fills these lists with the available projects and tabs. -->
-            <ul class = "document_list">
+            <ul class = "project_list">
                 
             </ul>
 
@@ -113,7 +113,7 @@
 
     <main>
         <!-- These panels provide the next available actions when no project or tab is open. -->
-        <div id = "empty_document_state" class = "deactive empty_state">
+        <div id = "empty_project_state" class = "deactive empty_state">
             <h2>This project is empty</h2>
             <div class="big_container">
                 <button data-action="create-tab">
@@ -130,12 +130,12 @@
         <div id = "empty_folder_state" class = "empty_state">
             <h2>Welcome to the document editor</h2>
             <div class = 'big_container'>
-                <button data-action='create-document'>
+                <button data-action='create-project'>
                     <i class='bx bx-plus'></i>
                     <span>Create New Project</span>
                 </button>
 
-                <button data-action='load-document'>
+                <button data-action='load-project'>
                     <i class='bx bxs-file-import'></i>
                     <span>Load Project</span>
                 </button>
@@ -219,12 +219,12 @@
         </ul>
     </div>
 
-    <!-- Commands that operate on the selected project/document. -->
-    <div class = "context_menu document_context_menu">
+    <!-- Commands that operate on the selected project. -->
+    <div class = "context_menu project_context_menu">
         <ul>
-            <li><button class = "document_context_btn" data-func = "create"> Create</button></li>
-            <li><button class = "document_context_btn" data-func = "rename"> Rename</button></li>
-            <li><button class = "document_context_btn" data-func = "delete"> Delete</button></li>
+            <li><button class = "project_context_btn" data-func = "create"> Create</button></li>
+            <li><button class = "project_context_btn" data-func = "rename"> Rename</button></li>
+            <li><button class = "project_context_btn" data-func = "delete"> Delete</button></li>
         </ul>
     </div>
 </body>

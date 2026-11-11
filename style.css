@@ -321,7 +321,7 @@ button:hover{
   color: var(--c-text-hover);
 }
 
-.document_tab_btn{
+.tab_btn{
   height: 32px;
   width: 200px;
 
@@ -331,7 +331,7 @@ button:hover{
 }
 
 
-.document_tab_btn span{
+.tab_btn span{
   display: all;
 }
 
@@ -340,19 +340,19 @@ button:hover{
 
 
 
-.document_tab_btn.selected{
+.tab_btn.selected{
   background-color: var(--c-secondary-element-hover);
   color: var(--c-text-hover);
   border: 4px solid d;
 }
 
-.document_btn.selected{
+.project_btn.selected{
   background-color: var(--c-secondary-element-hover);
   color: var(--c-text-hover);
   border: 4px solid red;
 }
 
-.document_btn{
+.project_btn{
   height: 96px;
   width: 200px;
 
@@ -369,7 +369,7 @@ button:hover{
   width: 200px;
 }
 
-.document_btns{
+.project_btns{
   display: flex;
   flex-flow: row;
   
