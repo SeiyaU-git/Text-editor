@@ -55,13 +55,13 @@ function redo(){
 }
 
 // Capture the editor's current HTML so it can be restored by undo.
-export function createSnapshot(){
+export function createSnapshot(markUnsaved = true){
     const html = editor.innerHTML;
     if (editorHistory[historyIndex] === html) return;
     editorHistory = editorHistory.slice(0, historyIndex + 1);
     editorHistory.push(html);
     historyIndex = editorHistory.length - 1;
-    isSaved = false 
+    isSaved = !markUnsaved;
     renderSaveStatus()
 
     renderMiniEditor()
@@ -746,7 +746,7 @@ function renderTab(projectName, tabName){
     if(!tab) return
     editor.innerHTML = tab.innerHTML
     clearSnapshot();
-    createSnapshot();
+    createSnapshot(false);
 }
 
 function renderMiniEditor(){
@@ -762,7 +762,14 @@ function renderMiniEditor(){
 function renderTabList(){
     const createButton = tabList.querySelector('[data-action="create-tab"]');
     tabList.innerHTML = "";
-    if (createButton) tabList.appendChild(createButton);
+    if (createButton) {
+        tabList.appendChild(createButton);
+    } else {
+        const newTabButton = document.createElement("button");
+        newTabButton.dataset.action = "create-tab";
+        newTabButton.innerHTML = '<i class="bx bxs-file-plus"></i><span>New</span>';
+        tabList.appendChild(newTabButton);
+    }
 
     
     for (const tab of (projectInfo?.tabs || [])) {
@@ -797,7 +804,14 @@ let projectList = document.querySelector(".project_list, .document_list");
 function renderProjectList(){
     const createButton = projectList.querySelector('[data-action="create-project"]');
     projectList.innerHTML = "";
-    if (createButton) projectList.appendChild(createButton);
+    if (createButton) {
+        projectList.appendChild(createButton);
+    } else {
+        const newProjectButton = document.createElement("button");
+        newProjectButton.dataset.action = "create-project";
+        newProjectButton.innerHTML = '<i class="bx bx-plus"></i><span>New</span>';
+        projectList.appendChild(newProjectButton);
+    }
     
     for (const project of folderInfo.projects) {
         const projectButton = document.createElement("button");
@@ -898,7 +912,6 @@ smoothScroll();
 
 //#endregion
 
-const tabElement = document.createElement("button");
 // const createTab = document.getElementById("createTab");
 
 const sidebar = document.querySelector(".sidebar");
@@ -1048,7 +1061,14 @@ document.addEventListener("click", (e) => {
             
             renderState = VIEW.PROJECTS;
             render();
-            clearSnapshot();
+            if (currentTab) {
+                renderTab(currentProject, currentTab);
+            } else {
+                editor.innerHTML = "";
+                clearSnapshot();
+                isSaved = true;
+                renderSaveStatus();
+            }
             break;
         
     }
